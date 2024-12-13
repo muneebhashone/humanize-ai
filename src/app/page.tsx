@@ -7,7 +7,7 @@ import { CalendarDateRangePicker } from "@/components/date-range-picker";
 import { Overview } from "@/components/overview";
 import { 
   ArrowUpRight, ArrowDownRight, Phone, Users, Clock, CheckCircle2, 
-  PhoneCall, PhoneOff, PlayCircle, PauseCircle, UserPlus, FileText,
+  PhoneCall, PlayCircle, PauseCircle, UserPlus, FileText,
   BarChart3, Settings2
 } from "lucide-react";
 import { cn } from "@/lib/utils";

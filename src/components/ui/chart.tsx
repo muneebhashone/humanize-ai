@@ -1,7 +1,8 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { Tooltip} from "recharts"
+import { Tooltip, TooltipProps } from "recharts"
+import { ValueType, NameType } from "recharts/types/component/DefaultTooltipContent"
 
 export type ChartConfig = {
   [key: string]: {
@@ -16,7 +17,6 @@ interface ChartContainerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function ChartContainer({
-
   children,
   className,
   ...props
@@ -31,10 +31,7 @@ export function ChartContainer({
   )
 }
 
-interface ChartTooltipContentProps {
-  active?: boolean
-  payload?: Array<{ name: string; value: number; payload: any }>
-  label?: string
+export interface ChartTooltipProps extends Omit<TooltipProps<ValueType, NameType>, 'config'> {
   config: ChartConfig
 }
 
@@ -43,7 +40,7 @@ export function ChartTooltipContent({
   payload,
   label,
   config,
-}: ChartTooltipContentProps) {
+}: ChartTooltipProps) {
   if (!active || !payload) {
     return null
   }
@@ -59,11 +56,11 @@ export function ChartTooltipContent({
             <div key={item.name} className="flex items-center gap-2">
               <div 
                 className="h-3 w-3 rounded-full" 
-                style={{ backgroundColor: config[item.name]?.color }}
+                style={{ backgroundColor: config[item?.name as string]?.color }}
               />
-              <span className="text-sm text-gray-600">{config[item.name]?.label}:</span>
+              <span className="text-sm text-gray-600">{config[item?.name as string]?.label}:</span>
               <span className="text-sm font-semibold text-gray-900">
-                {item.value.toLocaleString()}
+                {item.value?.toLocaleString()}
               </span>
             </div>
           ))}

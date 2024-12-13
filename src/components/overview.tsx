@@ -14,6 +14,7 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltipContent,
+ 
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 
@@ -66,7 +67,7 @@ export function Overview() {
             </CardDescription>
           </div>
           <div className="flex gap-6">
-            {stats.map((stat, index) => (
+            {stats.map((stat) => (
               <div key={stat.title} className="flex flex-col gap-1">
                 <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
                 <div className="flex items-center gap-2">
@@ -103,7 +104,7 @@ export function Overview() {
               />
               <Tooltip
                 cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-                content={(props: any) => <ChartTooltipContent {...props} config={chartConfig} />}
+                content={(props) => <ChartTooltipContent {...props} config={chartConfig} />}
               />
               <Bar 
                 dataKey="inbound" 
