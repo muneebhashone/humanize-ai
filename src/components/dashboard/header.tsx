@@ -39,16 +39,16 @@ export function DashboardHeader() {
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-1">
                   <span className="font-bold text-lg md:text-xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-600 bg-clip-text text-transparent">
-                    VICI
+                    Humanize
                   </span>
                   <span className="font-semibold text-base md:text-lg bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
-                    Dialer
+                    AI
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="h-1 w-1 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 group-hover:w-2 transition-all duration-300" />
                   <span className="text-[10px] md:text-xs text-muted-foreground/80 font-medium">
-                    Call Management
+                    Intelligent Conversations
                   </span>
                 </div>
               </div>
