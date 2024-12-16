@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import ClientLayout from "@/components/ClientLayout";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -9,15 +10,15 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "VICI Dashboard",
-  description: "VICI Dialing Dashboard Data Management",
+  title: "Humanize Dialer",
+  description: "Humanize AI Dialer Dashboard Data Management",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -28,7 +29,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <ClientLayout>
+            {children}
+          </ClientLayout>
         </ThemeProvider>
       </body>
     </html>

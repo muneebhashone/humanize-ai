@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -14,7 +13,6 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltipContent,
- 
 } from "@/components/ui/chart"
 import { cn } from "@/lib/utils"
 
@@ -56,30 +54,30 @@ const stats = [
 export function Overview() {
   return (
     <Card className="border-0 shadow-md">
-      <CardHeader>
-        <div className="flex items-center justify-between">
+      <CardHeader className="space-y-4 md:space-y-2">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <CardTitle className="text-xl md:text-2xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               Call Analytics
             </CardTitle>
-            <CardDescription className="mt-2">
+            <CardDescription className="mt-1.5 md:mt-2">
               January - June 2024
             </CardDescription>
           </div>
-          <div className="flex gap-6">
+          <div className="grid grid-cols-2 gap-4 md:flex md:gap-6">
             {stats.map((stat) => (
               <div key={stat.title} className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold">{stat.value}</span>
+                <p className="text-xs md:text-sm font-medium text-muted-foreground">{stat.title}</p>
+                <div className="flex items-center gap-1.5 md:gap-2">
+                  <span className="text-lg md:text-2xl font-bold">{stat.value}</span>
                   <span className={cn(
-                    "flex items-center text-sm",
+                    "flex items-center text-xs md:text-sm",
                     stat.trend === "up" ? "text-green-600" : "text-red-600"
                   )}>
                     {stat.trend === "up" ? (
-                      <ArrowUpRight className="h-4 w-4" />
+                      <ArrowUpRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     ) : (
-                      <ArrowDownRight className="h-4 w-4" />
+                      <ArrowDownRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                     )}
                     {stat.change}
                   </span>
@@ -89,10 +87,10 @@ export function Overview() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pl-2">
+      <CardContent className="pl-0 md:pl-2">
         <ChartContainer config={chartConfig}>
           <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={chartData}>
+            <BarChart data={chartData} margin={{ left: -20, right: 20 }}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" className="stroke-muted" />
               <XAxis
                 dataKey="month"
@@ -100,7 +98,7 @@ export function Overview() {
                 tickMargin={10}
                 axisLine={false}
                 tickFormatter={(value) => value.slice(0, 3)}
-                className="text-sm font-medium"
+                className="text-xs md:text-sm font-medium"
               />
               <Tooltip
                 cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
@@ -120,15 +118,15 @@ export function Overview() {
           </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-2 text-sm border-t pt-6">
-        <div className="flex gap-2 font-medium leading-none text-green-600">
-          <TrendingUp className="h-4 w-4" />
+      <div className="flex flex-col gap-2 border-t px-6 py-4 text-xs md:text-sm">
+        <div className="flex gap-2 font-medium text-green-600">
+          <TrendingUp className="h-3.5 w-3.5 md:h-4 md:w-4" />
           Overall call volume increased by 15.2% this month
         </div>
-        <div className="leading-none text-muted-foreground">
+        <div className="text-muted-foreground">
           Showing combined inbound and outbound calls for the last 6 months
         </div>
-      </CardFooter>
+      </div>
     </Card>
   )
 } 
