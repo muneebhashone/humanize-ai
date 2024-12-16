@@ -12,6 +12,10 @@ import {
   BarChart
 } from "lucide-react";
 
+interface DashboardNavProps {
+  setOpen?: (open: boolean) => void;
+}
+
 const items = [
   {
     title: "Overview",
@@ -57,7 +61,7 @@ const items = [
   },
 ];
 
-export function DashboardNav() {
+export function DashboardNav({ setOpen }: DashboardNavProps) {
   const pathname = usePathname();
 
   return (
@@ -70,8 +74,9 @@ export function DashboardNav() {
           <Link
             key={item.title}
             href={item.href}
+            onClick={() => setOpen?.(false)}
             className={cn(
-              "relative w-full p-3 rounded-lg border border-transparent",
+              "relative w-full p-2 md:p-3 rounded-lg border border-transparent",
               "overflow-hidden group bg-background",
               "hover:bg-accent hover:border-accent dark:hover:bg-accent/10",
               "transition-all duration-300",
@@ -90,7 +95,7 @@ export function DashboardNav() {
 
             {/* Background Icon */}
             <Icon className={cn(
-              "absolute -top-12 -right-12 h-32 w-32",
+              "absolute -top-12 -right-12 h-24 md:h-32 w-24 md:w-32",
               "text-muted/25 dark:text-muted/10 rotate-0 group-hover:rotate-12",
               "transition-transform duration-300",
               isActive && "rotate-12 text-accent"
