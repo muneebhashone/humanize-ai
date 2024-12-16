@@ -3,38 +3,37 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Phone, 
-  Users, 
+import {
+  BarChart3,
+  PhoneCall,
+  Users,
   Settings,
-  List,
-  BarChart
+  Megaphone,
 } from "lucide-react";
 
 interface DashboardNavProps {
   setOpen?: (open: boolean) => void;
 }
 
-const items = [
+const routes = [
   {
     title: "Overview",
     href: "/",
-    icon: LayoutDashboard,
+    icon: BarChart3,
     subtitle: "Dashboard stats",
     color: "from-violet-600 to-indigo-600",
   },
   {
-    title: "Call Logs",
+    title: "Calls",
     href: "/calls",
-    icon: Phone,
+    icon: PhoneCall,
     subtitle: "Call history",
     color: "from-blue-600 to-cyan-600",
   },
   {
     title: "Campaigns",
     href: "/campaigns",
-    icon: List,
+    icon: Megaphone,
     subtitle: "Active campaigns",
     color: "from-emerald-600 to-teal-600",
   },
@@ -44,13 +43,6 @@ const items = [
     icon: Users,
     subtitle: "Team management",
     color: "from-orange-600 to-amber-600",
-  },
-  {
-    title: "Analytics",
-    href: "/analytics",
-    icon: BarChart,
-    subtitle: "Call metrics",
-    color: "from-pink-600 to-rose-600",
   },
   {
     title: "Settings",
@@ -66,7 +58,7 @@ export function DashboardNav({ setOpen }: DashboardNavProps) {
 
   return (
     <nav className="grid items-start gap-2 p-2">
-      {items.map((item) => {
+      {routes.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
         
