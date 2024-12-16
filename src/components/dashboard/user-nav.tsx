@@ -26,25 +26,24 @@ export function UserNav() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-fit px-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-8 w-8 shadow-md">
-              <AvatarImage src="/avatars/01.png" alt="@user" className="object-cover" />
-              <AvatarFallback className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white">
-                JD
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden md:flex flex-col items-start">
-              <span className="text-sm font-medium">John Doe</span>
-              <span className="text-xs text-muted-foreground">Admin</span>
-            </div>
-            <motion.div
-              animate={open ? { rotate: 180 } : { rotate: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            </motion.div>
+        <Button variant="ghost" className="relative h-8 w-8 md:h-9 md:w-fit md:px-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <Avatar className="h-8 w-8 md:h-8 md:w-8">
+            <AvatarImage src="/avatars/01.png" alt="@user" className="object-cover" />
+            <AvatarFallback className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-xs md:text-sm">
+              JD
+            </AvatarFallback>
+          </Avatar>
+          <div className="hidden md:flex flex-col items-start ml-2">
+            <span className="text-sm font-medium">John Doe</span>
+            <span className="text-xs text-muted-foreground">Admin</span>
           </div>
+          <motion.div
+            animate={open ? { rotate: 180 } : { rotate: 0 }}
+            transition={{ duration: 0.2 }}
+            className="hidden md:block ml-2"
+          >
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </motion.div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end">
@@ -55,7 +54,7 @@ export function UserNav() {
         >
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              <p className="text-sm font-medium bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
                 John Doe
               </p>
               <p className="text-xs leading-none text-muted-foreground">

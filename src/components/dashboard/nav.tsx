@@ -3,66 +3,20 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Phone, 
-  Users, 
-  Settings,
-  List,
-  BarChart
-} from "lucide-react";
+import { routes } from "@/dummydata";
 
-const items = [
-  {
-    title: "Overview",
-    href: "/",
-    icon: LayoutDashboard,
-    subtitle: "Dashboard stats",
-    color: "from-violet-600 to-indigo-600",
-  },
-  {
-    title: "Call Logs",
-    href: "/calls",
-    icon: Phone,
-    subtitle: "Call history",
-    color: "from-blue-600 to-cyan-600",
-  },
-  {
-    title: "Campaigns",
-    href: "/campaigns",
-    icon: List,
-    subtitle: "Active campaigns",
-    color: "from-emerald-600 to-teal-600",
-  },
-  {
-    title: "Agents",
-    href: "/agents",
-    icon: Users,
-    subtitle: "Team management",
-    color: "from-orange-600 to-amber-600",
-  },
-  {
-    title: "Analytics",
-    href: "/analytics",
-    icon: BarChart,
-    subtitle: "Call metrics",
-    color: "from-pink-600 to-rose-600",
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-    subtitle: "Preferences",
-    color: "from-purple-600 to-fuchsia-600",
-  },
-];
+interface DashboardNavProps {
+  setOpen?: (open: boolean) => void;
+}
 
-export function DashboardNav() {
+
+
+export function DashboardNav({ setOpen }: DashboardNavProps) {
   const pathname = usePathname();
 
   return (
     <nav className="grid items-start gap-2 p-2">
-      {items.map((item) => {
+      {routes.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
         
@@ -70,8 +24,9 @@ export function DashboardNav() {
           <Link
             key={item.title}
             href={item.href}
+            onClick={() => setOpen?.(false)}
             className={cn(
-              "relative w-full p-3 rounded-lg border border-transparent",
+              "relative w-full p-2 md:p-3 rounded-lg border border-transparent",
               "overflow-hidden group bg-background",
               "hover:bg-accent hover:border-accent dark:hover:bg-accent/10",
               "transition-all duration-300",
@@ -90,7 +45,7 @@ export function DashboardNav() {
 
             {/* Background Icon */}
             <Icon className={cn(
-              "absolute -top-12 -right-12 h-32 w-32",
+              "absolute -top-12 -right-12 h-24 md:h-32 w-24 md:w-32",
               "text-muted/25 dark:text-muted/10 rotate-0 group-hover:rotate-12",
               "transition-transform duration-300",
               isActive && "rotate-12 text-accent"
