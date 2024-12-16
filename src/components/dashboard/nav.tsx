@@ -3,55 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-  BarChart3,
-  PhoneCall,
-  Users,
-  Settings,
-  Megaphone,
-} from "lucide-react";
+import { routes } from "@/dummydata";
 
 interface DashboardNavProps {
   setOpen?: (open: boolean) => void;
 }
 
-const routes = [
-  {
-    title: "Overview",
-    href: "/",
-    icon: BarChart3,
-    subtitle: "Dashboard stats",
-    color: "from-violet-600 to-indigo-600",
-  },
-  {
-    title: "Calls",
-    href: "/calls",
-    icon: PhoneCall,
-    subtitle: "Call history",
-    color: "from-blue-600 to-cyan-600",
-  },
-  {
-    title: "Campaigns",
-    href: "/campaigns",
-    icon: Megaphone,
-    subtitle: "Active campaigns",
-    color: "from-emerald-600 to-teal-600",
-  },
-  {
-    title: "Agents",
-    href: "/agents",
-    icon: Users,
-    subtitle: "Team management",
-    color: "from-orange-600 to-amber-600",
-  },
-  {
-    title: "Settings",
-    href: "/settings",
-    icon: Settings,
-    subtitle: "Preferences",
-    color: "from-purple-600 to-fuchsia-600",
-  },
-];
+
 
 export function DashboardNav({ setOpen }: DashboardNavProps) {
   const pathname = usePathname();

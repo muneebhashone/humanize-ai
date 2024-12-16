@@ -1,4 +1,4 @@
-import { BarChart3, PlayCircle, FileText, PhoneCall, UserPlus, PauseCircle, Settings2 } from "lucide-react";
+import { BarChart3, PlayCircle, FileText, PhoneCall, UserPlus, PauseCircle, Settings2, Settings, Megaphone } from "lucide-react";
 
 import { CheckCircle2, Clock, Users } from "lucide-react";
 
@@ -168,5 +168,50 @@ export const stats = [
       duration: "8:12",
       time: "3:30 PM",
       date: "2024-01-20",
+    },
+  ];
+
+  export const routes = [
+    {
+      title: "Overview",
+      href: "/",
+      icon: BarChart3,
+      subtitle: "Dashboard stats",
+      color: "from-violet-600 to-indigo-600",
+    },
+    {
+      title: "Calls",
+      href: "/calls",
+      icon: PhoneCall,
+      subtitle: "Call history",
+      color: "from-blue-600 to-cyan-600",
+    },
+    {
+      title: "Campaigns",
+      href: "/campaigns",
+      icon: Megaphone,
+      subtitle: "Active campaigns",
+      color: "from-emerald-600 to-teal-600",
+    },
+    {
+      title: "Analytics",
+      href: "/analytics",
+      icon: BarChart3,
+      subtitle: "Call analytics",
+      color: "from-violet-600 to-indigo-600",
+    },
+    {
+      title: "Agents",
+      href: "/agents",
+      icon: Users,
+      subtitle: "Team management",
+      color: "from-orange-600 to-amber-600",
+    },
+    {
+      title: "Settings",
+      href: "/settings",
+      icon: Settings,
+      subtitle: "Preferences",
+      color: "from-purple-600 to-fuchsia-600",
     },
   ];
