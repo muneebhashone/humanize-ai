@@ -10,7 +10,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,12 +20,49 @@ import {
 } from "@/components/ui/select";
 import { Phone, Users, PhoneCall } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z.object({
+  phoneNumber: z.string().min(10, {
+    message: "Please enter a valid phone number.",
+  }),
+  campaign: z.string({
+    required_error: "Please select a campaign.",
+  }),
+  dialingMode: z.string({
+    required_error: "Please select a dialing mode.",
+  }),
+});
 
 interface NewCallModalProps {
   trigger: React.ReactNode;
 }
 
 export function NewCallModal({ trigger }: NewCallModalProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      phoneNumber: "",
+      campaign: "",
+      dialingMode: "",
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+    // Handle call creation logic here
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -46,116 +82,139 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
             </div>
           </div>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
-          {/* Contact Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              Contact Details
-            </div>
-            <Separator />
-            <div className="grid gap-2">
-              <Label htmlFor="phone" className="text-sm font-medium">
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                placeholder="+1 (555) 000-0000"
-                className="col-span-3"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6 py-4">
+            {/* Contact Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Phone className="h-4 w-4" />
+                Contact Details
+              </div>
+              <Separator />
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="tel"
+                        placeholder="+1 (555) 000-0000"
+                        className="col-span-3"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          {/* Campaign Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <Users className="h-4 w-4" />
-              Campaign Settings
-            </div>
-            <Separator />
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="campaign" className="text-sm font-medium">
-                  Select Campaign
-                </Label>
-                <Select>
-                  <SelectTrigger id="campaign" className="w-full">
-                    <SelectValue placeholder="Choose a campaign" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="sales">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                        Sales Campaign
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="support">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-blue-500" />
-                        Support Campaign
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="survey">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-orange-500" />
-                        Survey Campaign
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Campaign Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                <Users className="h-4 w-4" />
+                Campaign Settings
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="mode" className="text-sm font-medium">
-                  Dialing Mode
-                </Label>
-                <Select>
-                  <SelectTrigger id="mode" className="w-full">
-                    <SelectValue placeholder="Select dialing mode" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="auto">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-violet-500" />
-                        Auto Dialer
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="predictive">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-indigo-500" />
-                        Predictive Dialer
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="preview">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-cyan-500" />
-                        Preview Dialer
-                      </div>
-                    </SelectItem>
-                    <SelectItem value="manual">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-gray-500" />
-                        Manual Dialer
-                      </div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+              <Separator />
+              <div className="grid gap-4">
+                <FormField
+                  control={form.control}
+                  name="campaign"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Select Campaign</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Choose a campaign" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="sales">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-green-500" />
+                              Sales Campaign
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="support">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-blue-500" />
+                              Support Campaign
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="survey">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-orange-500" />
+                              Survey Campaign
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="dialingMode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dialing Mode</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select dialing mode" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="auto">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-violet-500" />
+                              Auto Dialer
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="predictive">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-indigo-500" />
+                              Predictive Dialer
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="preview">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-cyan-500" />
+                              Preview Dialer
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="manual">
+                            <div className="flex items-center gap-2">
+                              <div className="h-2 w-2 rounded-full bg-gray-500" />
+                              Manual Dialer
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
-          </div>
-        </div>
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline">
-            Schedule for Later
-          </Button>
-          <Button 
-            type="submit"
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white gap-2"
-          >
-            <Phone className="h-4 w-4" />
-            Start Call
-          </Button>
-        </DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button variant="outline" type="button">
+                Schedule for Later
+              </Button>
+              <Button 
+                type="submit"
+                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white gap-2"
+              >
+                <Phone className="h-4 w-4" />
+                Start Call
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

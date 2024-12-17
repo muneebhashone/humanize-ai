@@ -6,8 +6,58 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Mail, Facebook, Twitter, Lock } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z.object({
+  firstName: z.string().min(2, {
+    message: "First name must be at least 2 characters.",
+  }),
+  lastName: z.string().min(2, {
+    message: "Last name must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+  confirmPassword: z.string(),
+  terms: z.boolean().refine((val) => val === true, {
+    message: "You must agree to the terms and conditions.",
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
 
 const MainRegister = () => {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      terms: false,
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
+    // Handle registration logic here
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -56,127 +106,197 @@ const MainRegister = () => {
                 Enter your details to get started
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                {/* Name Fields */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                    <div className="relative">
-                      <Input 
-                        id="firstName" 
-                        placeholder="First Name" 
-                        className="h-14 px-4 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 text-white placeholder:text-white/30"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    {/* Name Fields */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="firstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                              <div className="relative">
+                                <FormControl>
+                                  <Input 
+                                    placeholder="First Name" 
+                                    className="h-14 px-4 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 text-white placeholder:text-white/30"
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </div>
+                              <FormMessage className="text-sm text-red-500 mt-1" />
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="lastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <div className="relative group">
+                              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                              <div className="relative">
+                                <FormControl>
+                                  <Input 
+                                    placeholder="Last Name" 
+                                    className="h-14 px-4 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 text-white placeholder:text-white/30"
+                                    {...field}
+                                  />
+                                </FormControl>
+                              </div>
+                              <FormMessage className="text-sm text-red-500 mt-1" />
+                            </div>
+                          </FormItem>
+                        )}
                       />
                     </div>
-                  </div>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                    <div className="relative">
-                      <Input 
-                        id="lastName" 
-                        placeholder="Last Name" 
-                        className="h-14 px-4 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 text-white placeholder:text-white/30"
-                      />
-                    </div>
-                  </div>
-                </div>
-                {/* Email Field */}
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
-                    <Input 
-                      id="email" 
-                      placeholder="Email address" 
-                      type="email"
-                      className="h-14 px-12 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 pl-12 text-white placeholder:text-white/30"
+                    {/* Email Field */}
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                            <div className="relative">
+                              <Mail className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
+                              <FormControl>
+                                <Input 
+                                  placeholder="Email address" 
+                                  type="email"
+                                  className="h-14 px-12 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 pl-12 text-white placeholder:text-white/30"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </div>
+                            <FormMessage className="text-sm text-red-500 mt-1" />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    {/* Password Fields */}
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                            <div className="relative">
+                              <Lock className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  placeholder="Password"
+                                  className="h-14 px-12 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 pl-12 text-white placeholder:text-white/30"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </div>
+                            <FormMessage className="text-sm text-red-500 mt-1" />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="relative group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+                            <div className="relative">
+                              <Lock className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
+                              <FormControl>
+                                <Input 
+                                  type="password" 
+                                  placeholder="Confirm Password"
+                                  className="h-14 px-12 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 pl-12 text-white placeholder:text-white/30"
+                                  {...field}
+                                />
+                              </FormControl>
+                            </div>
+                            <FormMessage className="text-sm text-red-500 mt-1" />
+                          </div>
+                        </FormItem>
+                      )}
                     />
                   </div>
-                </div>
-                {/* Password Fields */}
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      placeholder="Password"
-                      className="h-14 px-12 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 pl-12 text-white placeholder:text-white/30"
-                    />
-                  </div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
-                    <Input 
-                      id="confirmPassword" 
-                      type="password" 
-                      placeholder="Confirm Password"
-                      className="h-14 px-12 rounded-xl bg-white/5 backdrop-blur-sm border-white/10 hover:border-white/20 focus:border-white/30 transition-all duration-300 pl-12 text-white placeholder:text-white/30"
-                    />
-                  </div>
-                </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                <Checkbox id="terms" className="border-white/10 data-[state=checked]:bg-white data-[state=checked]:border-white" />
-                <label
-                  htmlFor="terms"
-                  className="text-sm font-medium leading-none text-white/60"
-                >
-                  I agree to the Terms of Service and Privacy Policy
-                  </label>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-6">
-              <div className="relative group w-full">
-                <div className="absolute -inset-1 bg-gradient-to-r from-white/30 to-white/10 rounded-xl blur group-hover:blur-md transition-all duration-300" />
-                <Button 
-                  className="relative w-full h-14 bg-white hover:bg-white/90 text-black text-lg font-semibold rounded-xl transition-all duration-300"
-                >
-                Create Account
-              </Button>
-              </div>
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-white/10" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-black px-2 text-white/40">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-4 justify-center">
-                {[
-                  { icon: Facebook },
-                  { icon: Twitter },
-                  { icon: Mail }
-                ].map((item, index) => (
-                  <div key={index} className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-white/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="relative h-14 w-14 rounded-xl border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+                  <FormField
+                    control={form.control}
+                    name="terms"
+                    render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            className="border-white/10 data-[state=checked]:bg-white data-[state=checked]:border-white"
+                          />
+                        </FormControl>
+                        <FormLabel className="text-sm font-medium leading-none text-white/60">
+                          I agree to the Terms of Service and Privacy Policy
+                        </FormLabel>
+                        <FormMessage className="text-sm text-red-500 mt-1" />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+                <CardFooter className="flex flex-col gap-6">
+                  <div className="relative group w-full">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-white/30 to-white/10 rounded-xl blur group-hover:blur-md transition-all duration-300" />
+                    <Button 
+                      type="submit"
+                      className="relative w-full h-14 bg-white hover:bg-white/90 text-black text-lg font-semibold rounded-xl transition-all duration-300"
                     >
-                      <item.icon className="h-5 w-5 text-white/60 group-hover:text-white transition-colors duration-300" />
+                      Create Account
                     </Button>
                   </div>
-                ))}
-              </div>
-              <p className="text-sm text-center text-white/60">
-                Already have an account?{" "}
-                <Link 
-                  href="/login"
-                  className="font-medium text-white hover:text-white/80 transition-colors"
-                >
-                  Sign In
-                </Link>
-              </p>
-            </CardFooter>
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-white/10" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-black px-2 text-white/40">
+                        Or continue with
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 justify-center">
+                    {[
+                      { icon: Facebook },
+                      { icon: Twitter },
+                      { icon: Mail }
+                    ].map((item, index) => (
+                      <div key={index} className="relative group">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-white/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="relative h-14 w-14 rounded-xl border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+                        >
+                          <item.icon className="h-5 w-5 text-white/60 group-hover:text-white transition-colors duration-300" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-sm text-center text-white/60">
+                    Already have an account?{" "}
+                    <Link 
+                      href="/login"
+                      className="font-medium text-white hover:text-white/80 transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                  </p>
+                </CardFooter>
+              </form>
+            </Form>
           </Card>
         </div>
       </div>
