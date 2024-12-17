@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 
 const MainLogin = () => {
+  console.log("asdasdsad")
   return (
     <div className="min-h-screen flex items-center justify-center bg-black p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
