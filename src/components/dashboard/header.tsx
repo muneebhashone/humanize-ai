@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { UserNav } from "@/components/dashboard/user-nav";
-import { Sparkles, Bell, Phone, Headphones } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sparkles, Phone, Headphones } from "lucide-react";
+
 import { ThemeToggle } from "@/components/theme-toggle";
 import { MobileNav } from "./mobile-nav";
+import { NotificationsDropdown } from "./notifications-dropdown";
 
 export function DashboardHeader() {
   return (
@@ -62,22 +63,16 @@ export function DashboardHeader() {
           <ThemeToggle />
 
           {/* Notifications - Hide on smallest screens */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative hidden sm:flex hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <Bell className="h-4 w-4 md:h-5 md:w-5 text-gray-700 dark:text-gray-400" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-600 text-[10px] font-medium text-white flex items-center justify-center">
-              3
-            </span>
-          </Button>
+      
+          <NotificationsDropdown />
 
           {/* Divider - Hide on smallest screens */}
           <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
           {/* User Navigation */}
           <UserNav />
+
+         {/* Notifications Dropdown */}
         </div>
       </div>
     </header>
