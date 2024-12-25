@@ -3,18 +3,20 @@
 import Link from "next/link";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { Sparkles, Phone, Headphones } from "lucide-react";
-
 import { ThemeToggle } from "@/components/theme-toggle";
-import { MobileNav } from "./mobile-nav";
+
 import { NotificationsDropdown } from "./notifications-dropdown";
+import { useUser } from "@/hooks/queries/use-auth-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardHeader() {
+  const user = useUser();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4 md:px-6">
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Mobile Navigation */}
-          <MobileNav />
+       
 
           {/* Logo */}
           <Link 
@@ -59,20 +61,28 @@ export function DashboardHeader() {
 
         {/* Right Section */}
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
+          {/* User Welcome Message - Hide on mobile */}
+          <div className="hidden md:flex items-center gap-2">
+            {user ? (
+              <span className="text-sm font-medium text-muted-foreground">
+                Welcome back, <span className="text-foreground">{user.name}</span>
+              </span>
+            ) : (
+              <Skeleton className="h-5 w-[150px]" />
+            )}
+          </div>
+
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Notifications - Hide on smallest screens */}
-      
+          {/* Notifications */}
           <NotificationsDropdown />
 
           {/* Divider - Hide on smallest screens */}
           <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
           {/* User Navigation */}
-          <UserNav />
-
-         {/* Notifications Dropdown */}
+          <UserNav user={user} />
         </div>
       </div>
     </header>
