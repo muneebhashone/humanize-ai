@@ -6,11 +6,14 @@ import { Sparkles, Phone, Headphones } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 import { NotificationsDropdown } from "./notifications-dropdown";
-import { useUser } from "@/hooks/queries/use-auth-query";
+import { useUserQuery } from "@/hooks/queries/use-auth-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardHeader() {
-  const user = useUser();
+  const { data: user,isLoading } = useUserQuery();
+  
+
+ 
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -63,9 +66,9 @@ export function DashboardHeader() {
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
           {/* User Welcome Message - Hide on mobile */}
           <div className="hidden md:flex items-center gap-2">
-            {user ? (
+            { !isLoading ? (
               <span className="text-sm font-medium text-muted-foreground">
-                Welcome back, <span className="text-foreground">{user.name}</span>
+                Welcome back, <span className="text-foreground">{user?.data?.name}</span>
               </span>
             ) : (
               <Skeleton className="h-5 w-[150px]" />
@@ -82,7 +85,7 @@ export function DashboardHeader() {
           <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
           {/* User Navigation */}
-          <UserNav user={user} />
+          <UserNav user={user?.data} />
         </div>
       </div>
     </header>

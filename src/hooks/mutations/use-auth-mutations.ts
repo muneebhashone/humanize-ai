@@ -1,7 +1,8 @@
-import { useMutation} from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "@/lib/axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+
 
 interface LoginCredentials {
   email: string;
@@ -43,21 +44,27 @@ interface AuthResponse {
 }
 
 export const useLoginMutation = () => {
-  const router = useRouter();
-  
+
   return useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
       const { data } = await axios.post<AuthResponse>("/auth/login/email", credentials);
+      
+      Cookies.set('token', data.data.token, {
+        expires: 7, // 7 days
+        path: '/',
+        secure: true,
+        sameSite: 'lax'
+      });
       return data.data;
     },
     onSuccess: (data) => {
       // Store the token in localStorage
-      localStorage.setItem("token", data.token);
+    
+
       // Store user data
      
       // Redirect to dashboard
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
       toast.success(data.message || "Welcome back!");
     },
     onError: (error: Error) => {
@@ -67,7 +74,6 @@ export const useLoginMutation = () => {
 };
 
 export const useRegisterMutation = () => {
-  const router = useRouter();
 
   return useMutation({
     mutationFn: async (registerData: RegisterData) => {
@@ -76,10 +82,13 @@ export const useRegisterMutation = () => {
     },
     onSuccess: (data) => {
       toast.success(data.message || "Account created successfully!");
-      router.push("/login");
+      window.location.href = "/login";
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to create account. Please try again.");
     },
   });
-}; 
+};
+
+
+
