@@ -12,11 +12,11 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, User, CreditCard, LogOut, Loader2 } from "lucide-react";
+import { Settings, User, CreditCard, LogOut,  } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 interface UserNavProps {
   user?: {
     name: string;
@@ -28,39 +28,39 @@ interface UserNavProps {
 export function UserNav({ user }: UserNavProps) {
   const router = useRouter();
 
+
   const handleLogout = () => {
     // Clear user data and token
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    Cookies.remove('token');
     // Redirect to login
-    router.push("/login");
-    toast.success("Logged out successfully");
+    router.push('/');
+    // toast.success("Logged out successfully");
   };
 
-  if (!user) {
-    return (
-      <Button variant="ghost" size="icon" className="relative h-9 w-9" disabled>
-        <Loader2 className="h-5 w-5 animate-spin" />
-      </Button>
-    );
-  }
+  // if (!user) {
+  //   return (
+  //     <Button variant="ghost" size="icon" className="relative h-9 w-9" disabled>
+  //       <Loader2 className="h-5 w-5 animate-spin" />
+  //     </Button>
+  //   );
+  // }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative h-9 w-9">
           <Avatar className="h-9 w-9 transition-all hover:scale-105">
-            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`} alt={user.name} />
-            <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username}`} alt={user?.name} />
+            <AvatarFallback>{user?.name.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.name}</p>
+            <p className="text-sm font-medium leading-none">{user?.name}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>

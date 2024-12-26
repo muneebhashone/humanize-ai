@@ -4,7 +4,7 @@ import "./globals.css";
 import { Providers } from "@/lib/providers";
 import { Toaster } from "@/components/ui/sonner";
 import ClientLayout from "@/components/ClientLayout";
-import { AuthGuard } from "@/components/Auth/AuthGuard";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,9 +22,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
         <Providers>
-          <AuthGuard>
+        
             <ClientLayout>{children}</ClientLayout>
-          </AuthGuard>
+       
           <Toaster />
         </Providers>
       </body>
