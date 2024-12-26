@@ -1,7 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
-import axios from "@/lib/axios";
+import { MutationOptions, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import api from "@/lib/axios";
+import axios from "axios";
 
 
 interface LoginCredentials {
@@ -17,54 +18,35 @@ interface RegisterData {
   confirmPassword: string;
 }
 
-interface SocialAccount {
-  provider: string;
-  id: string;
-}
+// interface SocialAccount {
+//   provider: string;
+//   id: string;
+// }
 
-interface User {
-  _id: string;
-  email: string;
-  username: string;
-  name: string;
-  role: string;
-  socialAccount: SocialAccount[];
-  createdAt: string;
-  updatedAt: string;
-  sub: string;
-}
+// interface User {
+//   _id: string;
+//   email: string;
+//   username: string;
+//   name: string;
+//   role: string;
+//   socialAccount: SocialAccount[];
+//   createdAt: string;
+//   updatedAt: string;
+//   sub: string;
+// }
 
-interface AuthResponse {
-  success: boolean;
-  data: {
-    message: string;
-    token: string;
-    user: User;
-  };
-}
 
 export const useLoginMutation = () => {
+  const router = useRouter();
 
-  return useMutation({
+  return useMutation({  
     mutationFn: async (credentials: LoginCredentials) => {
-      const { data } = await axios.post<AuthResponse>("/auth/login/email", credentials);
       
-      Cookies.set('token', data.data.token, {
-        expires: 7, // 7 days
-        path: '/',
-        secure: true,
-        sameSite: 'lax'
-      });
-      return data.data;
+      const response = await axios.post("/api/auth/login", credentials);
+      return response.data;
     },
     onSuccess: (data) => {
-      // Store the token in localStorage
-    
-
-      // Store user data
-     
-      // Redirect to dashboard
-      window.location.href = "/";
+      router.push("/");
       toast.success(data.message || "Welcome back!");
     },
     onError: (error: Error) => {
@@ -77,8 +59,8 @@ export const useRegisterMutation = () => {
 
   return useMutation({
     mutationFn: async (registerData: RegisterData) => {
-      const { data } = await axios.post<AuthResponse>("/auth/register/email", registerData);
-      return data.data;
+      const response = await api.post("/auth/register/email", registerData);
+      return response.data;
     },
     onSuccess: (data) => {
       toast.success(data.message || "Account created successfully!");
@@ -91,4 +73,17 @@ export const useRegisterMutation = () => {
 };
 
 
+
+
+const logout = async () => {
+  const response = await axios.post("/api/auth/logout");
+  return response.data;
+}
+
+export const useLogoutMutation = (options?: MutationOptions) => {
+  return useMutation({
+    mutationFn: logout,
+    ...options,
+  });
+}
 

@@ -15,8 +15,9 @@ import {
 import { Settings, User, CreditCard, LogOut,  } from "lucide-react";
 import Link from "next/link";
 
-import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { useLogoutMutation } from "@/hooks/mutations/use-auth-mutations";
+import { toast } from "sonner";
 interface UserNavProps {
   user?: {
     name: string;
@@ -27,23 +28,13 @@ interface UserNavProps {
 
 export function UserNav({ user }: UserNavProps) {
   const router = useRouter();
-
-
-  const handleLogout = () => {
-    // Clear user data and token
-    Cookies.remove('token');
-    // Redirect to login
+  const { mutate: logout } = useLogoutMutation({onSuccess: () => {
+    toast.success("Logged out successfully");
     router.push('/');
-    // toast.success("Logged out successfully");
-  };
+  } }); 
 
-  // if (!user) {
-  //   return (
-  //     <Button variant="ghost" size="icon" className="relative h-9 w-9" disabled>
-  //       <Loader2 className="h-5 w-5 animate-spin" />
-  //     </Button>
-  //   );
-  // }
+
+  
 
   return (
     <DropdownMenu>
@@ -89,7 +80,7 @@ export function UserNav({ user }: UserNavProps) {
           </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-red-600 dark:text-red-400">
+        <DropdownMenuItem onClick={() => logout()} className="text-red-600 dark:text-red-400">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
           <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
