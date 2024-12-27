@@ -35,6 +35,16 @@ interface RegisterData {
 //   sub: string;
 // }
 
+interface ForgotPasswordData {
+  email: string;
+}
+
+interface ResetPasswordData {
+  userId: string;
+  code: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export const useLoginMutation = () => {
   const router = useRouter();
@@ -72,9 +82,6 @@ export const useRegisterMutation = () => {
   });
 };
 
-
-
-
 const logout = async () => {
   const response = await axios.post("/api/auth/logout");
   return response.data;
@@ -86,4 +93,37 @@ export const useLogoutMutation = (options?: MutationOptions) => {
     ...options,
   });
 }
+
+export const useForgetPasswordMutation = () => {
+  return useMutation({
+    mutationFn: async (data: ForgotPasswordData) => {
+      const response = await api.post("/auth/forget-password", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Reset link sent to your email!");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to send reset link. Please try again.");
+    },
+  });
+};
+
+export const useResetPasswordMutation = () => {
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: async (data: ResetPasswordData) => {
+      const response = await api.post("/auth/reset-password", data);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Password reset successfully!");
+      router.push("/login");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to reset password. Please try again.");
+    },
+  });
+};
 
