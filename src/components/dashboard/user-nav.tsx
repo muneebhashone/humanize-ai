@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLogoutMutation } from "@/hooks/mutations/use-auth-mutations";
 import { toast } from "sonner";
+
 interface UserNavProps {
   user?: {
     name: string;
@@ -27,10 +28,14 @@ interface UserNavProps {
 }
 
 export function UserNav({ user }: UserNavProps) {
-  const router = useRouter();
+
+
+  
+  const router = useRouter ();
+
   const { mutate: logout } = useLogoutMutation({onSuccess: () => {
     toast.success("Logged out successfully");
-    router.push('/');
+    router.replace('/');
   } }); 
 
 

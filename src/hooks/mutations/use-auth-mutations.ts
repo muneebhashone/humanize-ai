@@ -56,17 +56,17 @@ export const useLoginMutation = () => {
       return response.data;
     },
     onSuccess: (data) => {
-      router.push("/");
+      router.replace("/");
       toast.success(data.message || "Welcome back!");
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error(error.message || "Failed to login. Please try again.");
     },
   });
 };
 
 export const useRegisterMutation = () => {
-
+  const router = useRouter();
   return useMutation({
     mutationFn: async (registerData: RegisterData) => {
       const response = await api.post("/auth/register/email", registerData);
@@ -74,10 +74,10 @@ export const useRegisterMutation = () => {
     },
     onSuccess: (data) => {
       toast.success(data.message || "Account created successfully!");
-      window.location.href = "/login";
+     router.push('/login')
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to create account. Please try again.");
+    onError: (error) => {
+      toast.error(error.message)
     },
   });
 };
@@ -103,7 +103,7 @@ export const useForgetPasswordMutation = () => {
     onSuccess: () => {
       toast.success("Reset link sent to your email!");
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error(error.message || "Failed to send reset link. Please try again.");
     },
   });
@@ -121,7 +121,7 @@ export const useResetPasswordMutation = () => {
       toast.success("Password reset successfully!");
       router.push("/login");
     },
-    onError: (error: Error) => {
+    onError: (error) => {
       toast.error(error.message || "Failed to reset password. Please try again.");
     },
   });
