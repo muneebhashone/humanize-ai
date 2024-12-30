@@ -11,8 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { Mail, Facebook, Twitter, Lock, User } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Mail, Lock } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -21,9 +20,10 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useLoginMutation } from "@/hooks/mutations/use-auth-mutations";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -32,7 +32,6 @@ const formSchema = z.object({
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
   }),
-  remember: z.boolean().default(false),
 });
 
 const MainLogin = () => {
@@ -41,13 +40,19 @@ const MainLogin = () => {
     defaultValues: {
       email: "",
       password: "",
-      remember: false,
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Handle login logic here
+  const login = useLoginMutation();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await login.mutateAsync(values);
+      toast.success("Login successful!");
+    
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   }
 
   return (
@@ -62,13 +67,6 @@ const MainLogin = () => {
         {/* Left Side - Image */}
         <div className="relative hidden lg:block lg:w-1/2 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-black/90 via-gray-900/90 to-black/90 z-10" />
-          {/* <Image
-            src="/login-bg.jpg"
-            alt="Login"
-            width={1000}
-            height={1000}
-            className="absolute inset-0 w-full h-full object-cover scale-110 hover:scale-105 transition-transform duration-1000"
-          /> */}
           <div className="relative z-20 flex flex-col items-center justify-center h-full p-12 text-white">
             <div className="group">
               <div className="h-28 w-28 rounded-2xl bg-white/5 backdrop-blur-sm flex items-center justify-center mb-8 rotate-6 group-hover:rotate-0 transform transition-all duration-300 relative">
@@ -111,7 +109,7 @@ const MainLogin = () => {
                             <div className="relative group">
                               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-xl blur-lg group-hover:blur-xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
                               <div className="relative">
-                                <User className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
+                                <Mail className="absolute left-4 top-3.5 h-5 w-5 text-white/30 group-hover:text-white/60 transition-colors duration-300" />
                                 <FormControl>
                                   <Input 
                                     placeholder="Email address" 
@@ -150,25 +148,7 @@ const MainLogin = () => {
                         )}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
-                      <FormField
-                        control={form.control}
-                        name="remember"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-x-2">
-                            <FormControl>
-                              <Checkbox 
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                                className="border-white/10 data-[state=checked]:bg-white data-[state=checked]:border-white"
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-medium leading-none text-white/60">
-                              Remember me
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      />
+                    <div className="flex items-center justify-end">
                       <Link 
                         href="/forgot-password"
                         className="text-sm font-medium text-white/60 hover:text-white transition-colors"
@@ -183,37 +163,10 @@ const MainLogin = () => {
                       <Button 
                         type="submit"
                         className="relative w-full h-14 bg-white hover:bg-white/90 text-black text-lg font-semibold rounded-xl transition-all duration-300"
+                        disabled={login.isPending}
                       >
-                        Sign In
+                        {login.isPending ? "Signing in..." : "Sign In"}
                       </Button>
-                    </div>
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-white/10" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-[#0A0A0A] px-2 text-white/40">
-                          Or continue with
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 justify-center">
-                      {[
-                        { icon: Facebook },
-                        { icon: Twitter },
-                        { icon: Mail }
-                      ].map((item, index) => (
-                        <div key={index} className="relative group">
-                          <div className="absolute -inset-1 bg-gradient-to-r from-white/20 to-white/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className="relative h-14 w-14 rounded-xl border-white/10 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all duration-300"
-                          >
-                            <item.icon className="h-5 w-5 text-white/60 group-hover:text-white transition-colors duration-300" />
-                          </Button>
-                        </div>
-                      ))}
                     </div>
                     <p className="text-sm text-center text-white/60">
                       Don&apos;t have an account?{" "}
