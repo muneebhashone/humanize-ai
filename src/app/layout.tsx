@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/lib/providers";
+import { Toaster } from "@/components/ui/sonner";
 import ClientLayout from "@/components/ClientLayout";
 
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-});
+
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Humanize Dialer",
-  description: "Humanize AI Dialer Dashboard Data Management",
+  title: "Humanize AI",
+  description: "AI-powered customer service platform",
 };
 
 export default function RootLayout({
@@ -21,18 +20,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
-      <body className={`${geist.variable} font-sans antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ClientLayout>
-            {children}
-          </ClientLayout>
-        </ThemeProvider>
+      <body className={`${inter.className} antialiased`}>
+        <Providers>
+        
+            <ClientLayout>{children}</ClientLayout>
+       
+          <Toaster />
+        </Providers>
       </body>
     </html>
   );

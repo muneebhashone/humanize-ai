@@ -2,18 +2,24 @@
 
 import Link from "next/link";
 import { UserNav } from "@/components/dashboard/user-nav";
-import { Sparkles, Bell, Phone, Headphones } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sparkles, Phone, Headphones } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { MobileNav } from "./mobile-nav";
+
+import { NotificationsDropdown } from "./notifications-dropdown";
+import { useUserQuery } from "@/hooks/queries/use-auth-query";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function DashboardHeader() {
+  const { data: user,isLoading } = useUserQuery();
+  
+
+ 
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-14 items-center px-4 md:px-6">
         <div className="flex items-center gap-2 md:gap-4">
-          {/* Mobile Navigation */}
-          <MobileNav />
+       
 
           {/* Logo */}
           <Link 
@@ -58,26 +64,28 @@ export function DashboardHeader() {
 
         {/* Right Section */}
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
+          {/* User Welcome Message - Hide on mobile */}
+          <div className="hidden md:flex items-center gap-2">
+            { !isLoading ? (
+              <span className="text-sm font-medium text-muted-foreground">
+                Welcome back, <span className="text-foreground">{user?.data?.name}</span>
+              </span>
+            ) : (
+              <Skeleton className="h-5 w-[150px]" />
+            )}
+          </div>
+
           {/* Theme Toggle */}
           <ThemeToggle />
 
-          {/* Notifications - Hide on smallest screens */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative hidden sm:flex hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          >
-            <Bell className="h-4 w-4 md:h-5 md:w-5 text-gray-700 dark:text-gray-400" />
-            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-600 text-[10px] font-medium text-white flex items-center justify-center">
-              3
-            </span>
-          </Button>
+          {/* Notifications */}
+          <NotificationsDropdown />
 
           {/* Divider - Hide on smallest screens */}
           <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-800" />
 
           {/* User Navigation */}
-          <UserNav />
+          <UserNav user={user?.data} />
         </div>
       </div>
     </header>
