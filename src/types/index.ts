@@ -22,16 +22,21 @@ export interface RegisterData {
 }
 
 // Agent Types
-export interface Agent {
-  id: number;
+export interface CreateAgentData {
   name: string;
   email: string;
-  role: string;
+  persona: string;
+  voip_no: string;
+  dept: string;
+  tools: string[];
   status: string;
-  calls_today: number;
-  success_rate: string;
-  avg_duration: string;
-  avatar: string;
+  last_call?: string;
+}
+
+export interface Agent extends CreateAgentData {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AgentFilters {
