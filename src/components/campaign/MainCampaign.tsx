@@ -2,9 +2,9 @@
 
 import { Card } from "@/components/ui/card";
 import { 
-  Play, Pause, BarChart2, Users, Phone, 
-  Plus, MoreVertical, Search, ArrowUpRight, ArrowDownRight, 
-  Clock
+  Play, Pause, BarChart2, Users, 
+  MoreVertical, Search, ArrowUpRight, ArrowDownRight, 
+  Clock, Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { CampaignModal } from "@/components/modals/CampaignModal";
+import { useCampaignsQuery, useCampaignQuery } from "@/hooks/queries/use-campaign-queries";
+import { useDeleteCampaignMutation } from "@/hooks/mutations/use-campaign-mutations";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const stats = [
   {
@@ -55,63 +66,90 @@ const stats = [
   },
 ];
 
-const campaigns = [
-  {
-    id: 1,
-    name: "Q1 Sales Outreach",
-    status: "active",
-    agents: 12,
-    calls: 1250,
-    completed: 450,
-    success_rate: "36%",
-    progress: 36,
-    color: "from-green-600 to-emerald-600",
-  },
-  {
-    id: 2,
-    name: "Customer Feedback",
-    status: "paused",
-    agents: 8,
-    calls: 800,
-    completed: 600,
-    success_rate: "75%",
-    progress: 75,
-    color: "from-yellow-600 to-amber-600",
-  },
-  {
-    id: 3,
-    name: "Product Launch",
-    status: "scheduled",
-    agents: 15,
-    calls: 2000,
-    completed: 0,
-    success_rate: "0%",
-    progress: 0,
-    color: "from-blue-600 to-cyan-600",
-  },
-  {
-    id: 4,
-    name: "Support Follow-up",
-    status: "active",
-    agents: 10,
-    calls: 950,
-    completed: 380,
-    success_rate: "40%",
-    progress: 40,
-    color: "from-violet-600 to-purple-600",
-  },
+const statusOptions = [
+  { label: "All Status", value: "all" },
+  { label: "In Progress", value: "progress" },
+  { label: "Stopped", value: "stop" },
+  { label: "Completed", value: "completed" },
 ];
 
 export default function MainCampaign() {
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "all"
+  });
+
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const deleteCampaign = useDeleteCampaignMutation();
+
+  const { data: campaigns, isLoading } = useCampaignsQuery({
+    search: filters.search,
+    status: filters.status === "all" ? undefined : filters.status
+  });
+  
+  const { data: selectedCampaign } = useCampaignQuery(selectedCampaignId || "");
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilters(prev => ({ ...prev, search: e.target.value }));
+  };
+
+  const handleStatusChange = (value: string) => {
+    setFilters(prev => ({ 
+      ...prev, 
+      status: value 
+    }));
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "progress":
+        return "from-green-600 to-emerald-600";
+      case "stop":
+        return "from-yellow-600 to-amber-600";
+      case "completed":
+        return "from-blue-600 to-cyan-600";
+      default:
+        return "from-violet-600 to-purple-600";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "progress":
+        return <Play className="h-4 w-4 text-white md:text-green-500 md:group-hover:text-white" />;
+      case "stop":
+        return <Pause className="h-4 w-4 text-white md:text-yellow-500 md:group-hover:text-white" />;
+      case "completed":
+        return <Clock className="h-4 w-4 text-white md:text-blue-500 md:group-hover:text-white" />;
+      default:
+        return <Clock className="h-4 w-4 text-white md:text-violet-500 md:group-hover:text-white" />;
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    setSelectedCampaignId(id);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedCampaignId(null);
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteCampaign.mutateAsync(id);
+    } catch (error) {
+      console.error('Failed to delete campaign:', error);
+    }
+  };
+
   return (
     <main className="flex w-full flex-col overflow-hidden">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <div className="flex items-center justify-between space-y-2">
           <h2 className="text-3xl font-bold tracking-tight">Campaigns</h2>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            New Campaign
-          </Button>
+          <div className="flex items-center space-x-2">
+            <CampaignModal />
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -180,113 +218,138 @@ export default function MainCampaign() {
 
         <div className="space-y-4">
           <Card className="border-0 bg-background p-4">
-            <div className="flex space-x-2">
+            <div className="flex items-center gap-4">
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search campaigns..." className="pl-8" />
+                  <Input 
+                    placeholder="Search campaigns..." 
+                    className="pl-8" 
+                    value={filters.search}
+                    onChange={handleSearch}
+                  />
                 </div>
               </div>
-              <Button variant="outline">Filters</Button>
+              <Select
+                value={filters.status}
+                onValueChange={handleStatusChange}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {campaigns.map((campaign) => (
-              <Card key={campaign.id} className="group relative overflow-hidden border-0 bg-background hover:shadow-lg transition-all duration-300">
-                {/* Gradient Background Overlay */}
-                <div 
-                  className={cn(
-                    "absolute inset-0 bg-gradient-to-r",
-                    campaign.color,
-                    "md:translate-y-[100%] md:group-hover:translate-y-[0%] transition-transform duration-300",
-                    "opacity-100 dark:opacity-90"
-                  )}
-                />
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : !campaigns?.length ? (
+            <div className="flex flex-col items-center justify-center p-8 text-muted-foreground">
+              <p>No campaigns found</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {campaigns.map((campaign) => (
+                <Card key={campaign._id} className="group relative overflow-hidden border-0 bg-background hover:shadow-lg transition-all duration-300">
+                  {/* Gradient Background Overlay */}
+                  <div 
+                    className={cn(
+                      "absolute inset-0 bg-gradient-to-r",
+                      getStatusColor(campaign.status),
+                      "md:translate-y-[100%] md:group-hover:translate-y-[0%] transition-transform duration-300",
+                      "opacity-100 dark:opacity-90"
+                    )}
+                  />
 
-                <div className="p-6 relative z-10">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-semibold text-lg text-white md:text-foreground md:group-hover:text-white truncate">
-                      {campaign.name}
-                    </h3>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-white md:text-muted-foreground md:group-hover:text-white">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>Edit</DropdownMenuItem>
-                        <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-600">Delete</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                  <div className="p-6 relative z-10">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="font-semibold text-lg text-white md:text-foreground md:group-hover:text-white truncate">
+                        {campaign.name}
+                      </h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-white md:text-muted-foreground md:group-hover:text-white">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(campaign._id)}>
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(campaign._id)}>
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Agents</span>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
-                        <span className="font-medium text-white md:text-foreground md:group-hover:text-white">{campaign.agents}</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Agents</span>
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
+                          <span className="font-medium text-white md:text-foreground md:group-hover:text-white">
+                            {campaign.agents_ids.length}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Knowledge Base</span>
+                        <div className="flex items-center gap-2">
+                          <BarChart2 className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
+                          <span className="font-medium capitalize text-white md:text-foreground md:group-hover:text-white">
+                            {campaign.knowledge_base}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Status</span>
+                        <div className="flex items-center gap-2">
+                          {getStatusIcon(campaign.status)}
+                          <span className="font-medium capitalize text-white md:text-foreground md:group-hover:text-white">
+                            {campaign.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Created</span>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
+                          <span className="font-medium text-white md:text-foreground md:group-hover:text-white">
+                            {new Date(campaign.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Total Calls</span>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
-                        <span className="font-medium text-white md:text-foreground md:group-hover:text-white">{campaign.calls}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Success Rate</span>
-                      <div className="flex items-center gap-2">
-                        <BarChart2 className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
-                        <span className="font-medium text-white md:text-foreground md:group-hover:text-white">{campaign.success_rate}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Status</span>
-                      <div className="flex items-center gap-2">
-                        {campaign.status === "active" ? (
-                          <Play className="h-4 w-4 text-white md:text-green-500 md:group-hover:text-white" />
-                        ) : campaign.status === "paused" ? (
-                          <Pause className="h-4 w-4 text-white md:text-yellow-500 md:group-hover:text-white" />
-                        ) : (
-                          <Clock className="h-4 w-4 text-white md:text-blue-500 md:group-hover:text-white" />
-                        )}
-                        <span className="font-medium capitalize text-white md:text-foreground md:group-hover:text-white">
-                          {campaign.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="mt-6">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Progress</span>
-                      <span className="text-xs font-medium text-white md:text-foreground md:group-hover:text-white">
-                        {campaign.completed}/{campaign.calls}
-                      </span>
-                    </div>
-                    <div className="h-2 w-full bg-white/20 md:bg-secondary rounded-full overflow-hidden">
-                      <div 
-                        className={cn(
-                          "h-full rounded-full transition-all",
-                          campaign.status === "active" && "bg-white md:bg-green-500",
-                          campaign.status === "paused" && "bg-white md:bg-yellow-500",
-                          campaign.status === "scheduled" && "bg-white md:bg-blue-500"
-                        )}
-                        style={{ width: `${campaign.progress}%` }}
-                      />
+                    <div className="mt-6">
+                      <p className="text-sm text-white/70 md:text-muted-foreground md:group-hover:text-white/70 line-clamp-2">
+                        {campaign.description}
+                      </p>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {selectedCampaignId && (
+        <CampaignModal 
+          campaign={selectedCampaign}
+          onOpenChange={(open) => !open && handleCloseModal()}
+        />
+      )}
     </main>
   );
 } 

@@ -55,7 +55,7 @@ const tools = [
   { label: "Video", value: "video" },
 ]
 const statuses = [
-  { label: "On Call", value: "on_call" },
+  { label: "On Call", value: "on call" },
   { label: "Available", value: "available" },
   { label: "Sleep", value: "sleep" },
 ]

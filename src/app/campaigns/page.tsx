@@ -9,5 +9,4 @@ const CampaignsPage = () => {
     </div>
   )
 }
-
 export default CampaignsPage
