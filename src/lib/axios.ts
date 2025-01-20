@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://18.246.68.1:3000/api',
+  baseURL: typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_SERVER_URL,
   headers: {
     'Content-Type': 'application/json',
     withCredentials: true,
