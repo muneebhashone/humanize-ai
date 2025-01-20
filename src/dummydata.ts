@@ -208,6 +208,13 @@ export const stats = [
       color: "from-orange-600 to-amber-600",
     },
     {
+      title: "Leads",
+      href: "/leads",
+      icon: Users,
+      subtitle: "Leads management",
+      color: "from-orange-600 to-amber-600",
+    },
+    {
       title: "Settings",
       href: "/settings",
       icon: Settings,
