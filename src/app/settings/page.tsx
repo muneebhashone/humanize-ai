@@ -1,11 +1,8 @@
-"use client";
 
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { AccountSettings } from "@/components/settings/AccountSettings";
-import { NotificationSettings } from "@/components/settings/NotificationSettings";
-import { CallSettings } from "@/components/settings/CallSettings";
-import { SystemSettings } from "@/components/settings/SystemSettings";
+import { UserSettings } from "@/components/settings/UserSettings";
 
 export default function SettingsPage() {
   return (
@@ -21,11 +18,10 @@ export default function SettingsPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <AccountSettings />
-          <NotificationSettings />
-          <CallSettings />
-          <SystemSettings />
+          {/* <UserPermissionsSettings /> */}
+          <UserSettings />
         </div>
       </div>
     </main>
   );
-} 
+}
