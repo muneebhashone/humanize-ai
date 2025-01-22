@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Phone, Users, PhoneCall } from "lucide-react";
+import { Phone, Users, PhoneCall, Loader2, PhoneOff } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -31,16 +31,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  useStartCallMutation,
+  useEndCallMutation,
+} from "@/hooks/mutations/use-call-mutations";
+import { useCampaignsQuery } from "@/hooks/queries/use-campaign-queries";
+import { useAgentsQuery } from "@/hooks/queries/use-agent-queries";
+import { toast } from "sonner";
+import { useState } from "react";
 
 const formSchema = z.object({
-  phoneNumber: z.string().min(10, {
-    message: "Please enter a valid phone number.",
-  }),
-  campaign: z.string({
+  phone: z.string().min(10, "Phone must be at least 10 characters"),
+  campaignId: z.string({
     required_error: "Please select a campaign.",
   }),
-  dialingMode: z.string({
-    required_error: "Please select a dialing mode.",
+  agentId: z.string({
+    required_error: "Please select an agent.",
   }),
 });
 
@@ -49,25 +55,57 @@ interface NewCallModalProps {
 }
 
 export function NewCallModal({ trigger }: NewCallModalProps) {
+  const [open, setOpen] = useState(false);
+  const [activeCall, setActiveCall] = useState<string | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      phoneNumber: "",
-      campaign: "",
-      dialingMode: "",
+      phone: "",
+      campaignId: "",
+      agentId: "",
+    },
+  });
+
+  const { data: campaigns, isLoading: isLoadingCampaigns } =
+    useCampaignsQuery();
+  const { data: agents, isLoading: isLoadingAgents } = useAgentsQuery();
+
+  const { mutate: startCall, isPending: isStarting } = useStartCallMutation({
+    onSuccess: () => {
+      toast.success("Call started successfully");
+      setActiveCall(form.getValues().phone); // Store active call phone number
+    },
+    onError: (error) => {
+      toast.error("Failed to start call: " + error.message);
+    },
+  });
+
+  const { mutate: endCall, isPending: isEnding } = useEndCallMutation({
+    onSuccess: () => {
+      toast.success("Call ended successfully");
+      setActiveCall(null); // Clear active call
+      setOpen(false); // Close modal
+      form.reset(); // Reset form
+    },
+    onError: (error) => {
+      toast.error("Failed to end call: " + error.message);
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Handle call creation logic here
+    startCall(values);
+  }
+
+  function handleEndCall() {
+    if (activeCall) {
+      endCall({ phone: activeCall });
+    }
   }
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <div className="flex items-center gap-2">
@@ -83,7 +121,10 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
           </div>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6 py-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid gap-6 py-4"
+          >
             {/* Contact Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -93,7 +134,7 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
               <Separator />
               <FormField
                 control={form.control}
-                name="phoneNumber"
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
@@ -115,41 +156,56 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                 <Users className="h-4 w-4" />
-                Campaign Settings
+                Campaign & Agent Settings
               </div>
               <Separator />
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="campaign"
+                  name="campaignId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Select Campaign</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={!!activeCall}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Choose a campaign" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="sales">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-green-500" />
-                              Sales Campaign
+                          {isLoadingCampaigns ? (
+                            <div className="flex items-center justify-center p-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
                             </div>
-                          </SelectItem>
-                          <SelectItem value="support">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-blue-500" />
-                              Support Campaign
+                          ) : campaigns?.length === 0 ? (
+                            <div className="p-2 text-sm text-muted-foreground">
+                              No campaigns found
                             </div>
-                          </SelectItem>
-                          <SelectItem value="survey">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-orange-500" />
-                              Survey Campaign
-                            </div>
-                          </SelectItem>
+                          ) : (
+                            campaigns?.map((campaign) => (
+                              <SelectItem
+                                key={campaign._id}
+                                value={campaign._id}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className={`h-2 w-2 rounded-full ${
+                                      campaign.status === "progress"
+                                        ? "bg-green-500"
+                                        : campaign.status === "stop"
+                                        ? "bg-yellow-500"
+                                        : "bg-blue-500"
+                                    }`}
+                                  />
+                                  {campaign.name}
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -158,41 +214,39 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
                 />
                 <FormField
                   control={form.control}
-                  name="dialingMode"
+                  name="agentId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Dialing Mode</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel>Select Agent</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        disabled={!!activeCall}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select dialing mode" />
+                            <SelectValue placeholder="Select an agent" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="auto">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-violet-500" />
-                              Auto Dialer
+                          {isLoadingAgents ? (
+                            <div className="flex items-center justify-center p-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
                             </div>
-                          </SelectItem>
-                          <SelectItem value="predictive">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-indigo-500" />
-                              Predictive Dialer
+                          ) : agents?.length === 0 ? (
+                            <div className="p-2 text-sm text-muted-foreground">
+                              No agents found
                             </div>
-                          </SelectItem>
-                          <SelectItem value="preview">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-cyan-500" />
-                              Preview Dialer
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="manual">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full bg-gray-500" />
-                              Manual Dialer
-                            </div>
-                          </SelectItem>
+                          ) : (
+                            agents?.map((agent) => (
+                              <SelectItem key={agent._id} value={agent._id}>
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-2 rounded-full bg-violet-500" />
+                                  {agent.name}
+                                </div>
+                              </SelectItem>
+                            ))
+                          )}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -202,20 +256,40 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
               </div>
             </div>
             <DialogFooter className="gap-2 sm:gap-0">
-              <Button variant="outline" type="button">
-                Schedule for Later
-              </Button>
-              <Button 
-                type="submit"
-                className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white gap-2"
-              >
-                <Phone className="h-4 w-4" />
-                Start Call
-              </Button>
+              {!activeCall ? (
+                <>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={() => setOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white gap-2"
+                    disabled={isStarting}
+                  >
+                    <Phone className="h-4 w-4" />
+                    {isStarting ? "Starting Call..." : "Start Call"}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="w-full gap-2"
+                  onClick={handleEndCall}
+                  disabled={isEnding}
+                >
+                  <PhoneOff className="h-4 w-4" />
+                  {isEnding ? "Ending Call..." : "End Call"}
+                </Button>
+              )}
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
   );
-} 
+}
