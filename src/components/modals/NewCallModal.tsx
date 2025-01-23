@@ -9,7 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -36,12 +36,11 @@ import {
   useEndCallMutation,
 } from "@/hooks/mutations/use-call-mutations";
 import { useCampaignsQuery } from "@/hooks/queries/use-campaign-queries";
-import { useAgentsQuery } from "@/hooks/queries/use-agent-queries";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const formSchema = z.object({
-  phone: z.string().min(10, "Phone must be at least 10 characters"),
+  phone: z.string().min(8, "Phone must be at least 8 characters").max(15, "Phone must be at most 15 characters"),
   campaignId: z.string({
     required_error: "Please select a campaign.",
   }),
@@ -69,7 +68,32 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
 
   const { data: campaigns, isLoading: isLoadingCampaigns } =
     useCampaignsQuery();
-  const { data: agents, isLoading: isLoadingAgents } = useAgentsQuery();
+  
+
+  // Get selected campaign
+  const selectedCampaign = campaigns?.find(
+    (c) => c._id === form.watch("campaignId")
+  );
+
+  // Filter phone numbers based on selected campaign
+  const phoneOptions =
+    selectedCampaign?.leads.map((lead) => ({
+      label: `${lead.name} - ${lead.phone}`,
+      value: lead.phone,
+    })) || [];
+
+  // Filter agents based on selected campaign
+  const agentOptions =
+    selectedCampaign?.agents_ids.map((agent) => ({
+      label: agent.name,
+      value: agent._id,
+    })) || [];
+
+  // Reset phone and agent when campaign changes
+  useEffect(() => {
+    form.setValue("phone", "");
+    form.setValue("agentId", "");
+  }, [form.watch("campaignId"), form]);
 
   const { mutate: startCall, isPending: isStarting } = useStartCallMutation({
     onSuccess: () => {
@@ -134,18 +158,71 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
               <Separator />
               <FormField
                 control={form.control}
+                name="campaignId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Campaign</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose a campaign" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {isLoadingCampaigns ? (
+                          <div className="flex items-center justify-center p-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </div>
+                        ) : campaigns?.length === 0 ? (
+                          <div className="p-2 text-sm text-muted-foreground">
+                            No campaigns found
+                          </div>
+                        ) : (
+                          campaigns?.map((campaign) => (
+                            <SelectItem key={campaign._id} value={campaign._id}>
+                              {campaign.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="tel"
-                        placeholder="+1 (555) 000-0000"
-                        className="col-span-3"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      disabled={!form.watch("campaignId")}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select phone number" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {phoneOptions.length === 0 ? (
+                          <div className="p-2 text-sm text-muted-foreground">
+                            No phone numbers available
+                          </div>
+                        ) : (
+                          phoneOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.value}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -162,58 +239,6 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="campaignId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Select Campaign</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        disabled={!!activeCall}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Choose a campaign" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {isLoadingCampaigns ? (
-                            <div className="flex items-center justify-center p-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            </div>
-                          ) : campaigns?.length === 0 ? (
-                            <div className="p-2 text-sm text-muted-foreground">
-                              No campaigns found
-                            </div>
-                          ) : (
-                            campaigns?.map((campaign) => (
-                              <SelectItem
-                                key={campaign._id}
-                                value={campaign._id}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className={`h-2 w-2 rounded-full ${
-                                      campaign.status === "progress"
-                                        ? "bg-green-500"
-                                        : campaign.status === "stop"
-                                        ? "bg-yellow-500"
-                                        : "bg-blue-500"
-                                    }`}
-                                  />
-                                  {campaign.name}
-                                </div>
-                              </SelectItem>
-                            ))
-                          )}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="agentId"
                   render={({ field }) => (
                     <FormItem>
@@ -221,7 +246,7 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        disabled={!!activeCall}
+                        disabled={!form.watch("campaignId")}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -229,21 +254,17 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {isLoadingAgents ? (
-                            <div className="flex items-center justify-center p-2">
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            </div>
-                          ) : agents?.length === 0 ? (
+                          {agentOptions.length === 0 ? (
                             <div className="p-2 text-sm text-muted-foreground">
-                              No agents found
+                              No agents available
                             </div>
                           ) : (
-                            agents?.map((agent) => (
-                              <SelectItem key={agent._id} value={agent._id}>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-2 w-2 rounded-full bg-violet-500" />
-                                  {agent.name}
-                                </div>
+                            agentOptions.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
                               </SelectItem>
                             ))
                           )}

@@ -1,9 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { AccountSettings } from "@/components/settings/AccountSettings";
-import { UserSettings } from "@/components/settings/UserSettings";
-
+  
 export default function SettingsPage() {
   return (
     <main className="flex w-full flex-col overflow-hidden">
@@ -18,8 +16,7 @@ export default function SettingsPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <AccountSettings />
-          {/* <UserPermissionsSettings /> */}
-          <UserSettings />
+       
         </div>
       </div>
     </main>
