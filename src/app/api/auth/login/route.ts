@@ -4,10 +4,14 @@ import api from "@/lib/axios";
 
 export async function POST(request: Request) {
   try {
+
+
     const body = await request.json();
     
     // Call your backend API
     const response = await api.post("/auth/login/email", body)
+
+
     const cookieStore = await cookies();
     
     cookieStore.set({
@@ -22,6 +26,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response.data.data);
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Something went wrong" },
       { status: 500 }
