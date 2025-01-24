@@ -40,7 +40,10 @@ import { toast } from "sonner";
 import { useState, useEffect } from "react";
 
 const formSchema = z.object({
-  phone: z.string().min(8, "Phone must be at least 8 characters").max(15, "Phone must be at most 15 characters"),
+  phone: z
+    .string()
+    .min(8, "Phone must be at least 8 characters")
+    .max(15, "Phone must be at most 15 characters"),
   campaignId: z.string({
     required_error: "Please select a campaign.",
   }),
@@ -68,7 +71,6 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
 
   const { data: campaigns, isLoading: isLoadingCampaigns } =
     useCampaignsQuery();
-  
 
   // Get selected campaign
   const selectedCampaign = campaigns?.find(
@@ -89,11 +91,14 @@ export function NewCallModal({ trigger }: NewCallModalProps) {
       value: agent._id,
     })) || [];
 
+  // Watch campaignId for changes
+  const campaignId = form.watch("campaignId");
+
   // Reset phone and agent when campaign changes
   useEffect(() => {
     form.setValue("phone", "");
     form.setValue("agentId", "");
-  }, [form.watch("campaignId"), form]);
+  }, [campaignId, form]);
 
   const { mutate: startCall, isPending: isStarting } = useStartCallMutation({
     onSuccess: () => {
