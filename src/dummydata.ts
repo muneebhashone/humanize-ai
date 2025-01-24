@@ -1,4 +1,4 @@
-import { BarChart3, PlayCircle, FileText, PhoneCall, UserPlus, PauseCircle, Settings2, Settings, Megaphone } from "lucide-react";
+import { BarChart3, PlayCircle, FileText, PhoneCall, UserPlus, PauseCircle, Settings2, Settings, Megaphone, ShieldCheck } from "lucide-react";
 
 import { CheckCircle2, Clock, Users } from "lucide-react";
 
@@ -220,5 +220,12 @@ export const stats = [
       icon: Settings,
       subtitle: "Preferences",
       color: "from-purple-600 to-fuchsia-600",
+    },
+    {
+      title: "Permissions",
+      href: "/permissions",
+      icon: ShieldCheck,
+      subtitle: "User permissions",
+      color: "from-orange-600 to-amber-600",
     },
   ];

@@ -1,12 +1,12 @@
-import axios from 'axios';
-import Cookies from 'js-cookie';
-
+import axios from "axios";
+import Cookies from "js-cookie";
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: typeof window !== 'undefined' ? process.env.NEXT_PUBLIC_API_URL : process.env.NEXT_PUBLIC_SERVER_URL,
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL || "https://node.hostingladz.com:1443/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
     withCredentials: true,
   },
 });
@@ -15,13 +15,13 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Get token from localStorage
-    const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
-    
+    const token = typeof window !== "undefined" ? Cookies.get("token") : null;
+
     // If token exists, add it to headers
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -34,7 +34,7 @@ api.interceptors.request.use(
 //   (response) => response,
 //   (error) => {
 //     const message = error.response?.data?.message || 'Something went wrong';
-    
+
 //     // Handle different error status codes
 //     switch (error.response?.status) {
 //       case 401:
@@ -62,4 +62,4 @@ api.interceptors.request.use(
 //   }
 // );
 
-export default api; 
+export default api;

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 
-interface Lead {
+export interface Lead {
   _id: string;
   name: string;
   phone: string;

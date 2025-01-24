@@ -1,171 +1,155 @@
-import { cn } from '@/lib/utils'
-import React from 'react'
-import { Card } from '../ui/card'
-import { Clock, PhoneCall, PhoneOff, Search, ArrowDownRight, ArrowUpRight} from 'lucide-react'
-import { calllogs, callstats } from '@/dummydata'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
-// import { CalendarDateRangePicker } from '../date-range-picker'
+"use client";
+
+import { cn } from "@/lib/utils";
+import React from "react";
+import { Card } from "../ui/card";
+import { PhoneCall, PhoneOff } from "lucide-react";
+import { useCallLogsQuery } from "@/hooks/queries/use-call-queries";
+import { Skeleton } from "../ui/skeleton";
 
 const CallLogs = () => {
+  const { data: callLogs, isLoading } = useCallLogsQuery();
+
+  // Helper function to format duration
+  const getDuration = (start: string, end?: string) => {
+    if (!end) return "In Progress";
+    const duration = new Date(end).getTime() - new Date(start).getTime();
+    const seconds = Math.floor(duration / 1000);
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}:${(seconds % 60).toString().padStart(2, "0")}`;
+  };
+
+  // Helper function to format time
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString();
+  };
+
+  // Helper function to format date
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleDateString();
+  };
+
   return (
     <main className="flex w-full flex-col overflow-hidden">
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Call Logs</h2>
-        {/* <div className="flex items-center space-x-2">
-          <CalendarDateRangePicker />
-          <Button>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-        </div> */}
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {callstats.map((stat) => (
-          <Card 
-            key={stat.title} 
-            className="group relative overflow-hidden border-0 bg-background hover:shadow-lg transition-all duration-300"
-          >
-            {/* Gradient Background Overlay */}
-            <div 
-              className={cn(
-                "absolute inset-0 bg-gradient-to-r",
-                stat.color,
-                "md:translate-y-[100%] md:group-hover:translate-y-[0%] transition-transform duration-300",
-                "opacity-100 dark:opacity-90"
-              )}
-            />
-            
-            {/* Large Background Icon */}
-            <div className="absolute -top-12 -right-12 transition-all duration-300">
-              <PhoneCall className={cn(
-                "h-32 w-32 rotate-12 md:rotate-0 md:group-hover:rotate-12 transition-all duration-300",
-                "text-muted/25 dark:text-muted/10",
-                stat.iconColor
-              )} />
-            </div>
-
-            <div className="p-6 relative z-10">
-              <div className="flex items-center justify-between mb-4">
-                <div className={cn(
-                  "p-2 rounded-lg transition-colors duration-300",
-                  "bg-white/20 md:bg-${stat.bgColor} dark:bg-gray-800 md:group-hover:bg-white/20"
-                )}>
-                  <PhoneCall className={cn(
-                    "h-5 w-5 transition-colors duration-300",
-                    "text-white md:text-${stat.color.split('-')[0]}-600 md:dark:text-${stat.color.split('-')[0]}-400",
-                    "md:group-hover:text-white"
-                  )} />
-                </div>
-                <span className={cn(
-                  "flex items-center text-sm font-medium gap-1 px-2 py-1 rounded-full transition-colors duration-300",
-                  stat.trend === "up" 
-                    ? "text-white bg-white/20 md:text-green-700 md:bg-green-100 md:dark:text-green-400 md:dark:bg-green-400/10 md:group-hover:bg-white/20 md:group-hover:text-white" 
-                    : "text-white bg-white/20 md:text-red-700 md:bg-red-100 md:dark:text-red-400 md:dark:bg-red-400/10 md:group-hover:bg-white/20 md:group-hover:text-white"
-                )}>
-                  {stat.trend === "up" ? (
-                    <ArrowUpRight className="h-4 w-4" />
-                  ) : (
-                    <ArrowDownRight className="h-4 w-4" />
-                  )}
-                  {stat.change}
-                </span>
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-medium text-white md:text-muted-foreground md:group-hover:text-white/80 transition-colors duration-300">
-                  {stat.title}
-                </h3>
-                <div className="text-2xl font-bold text-white md:text-foreground md:group-hover:text-white transition-colors duration-300">
-                  {stat.value}
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div className="space-y-4">
-        <Card className="border-0 bg-background p-4">
-          <div className="flex space-x-2">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search calls..." className="pl-8" />
-              </div>
-            </div>
-            <Button variant="outline">
-              <Clock className="mr-2 h-4 w-4" />
-              Last 7 Days
-            </Button>
-            <Button variant="outline">Filters</Button>
-          </div>
-        </Card>
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-3xl font-bold tracking-tight">Call Logs</h2>
+        </div>
 
         <Card className="border-0 bg-background">
           <div className="relative w-full overflow-auto">
             <table className="w-full caption-bottom text-sm">
               <thead>
                 <tr className="border-b transition-colors hover:bg-muted/50">
-                  <th className="h-12 px-4 text-left align-middle font-medium">Type</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Agent</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Customer</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Phone</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Duration</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Time</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Date</th>
-                  <th className="h-12 px-4 text-left align-middle font-medium">Status</th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Type
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Agent ID
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Customer
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Phone
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Duration
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Time
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Date
+                  </th>
+                  <th className="h-12 px-4 text-left align-middle font-medium">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {calllogs.map((call) => (
-                  <tr
-                    key={call.id}
-                    className="border-b transition-colors hover:bg-muted/50"
-                  >
-                    <td className="p-4">
-                      <div className={cn(
-                        "flex h-8 w-8 items-center justify-center rounded-full",
-                        call.type === "outbound" 
-                          ? "bg-green-100 dark:bg-green-500/20" 
-                          : "bg-blue-100 dark:bg-blue-500/20"
-                      )}>
-                        {call.type === "outbound" ? (
-                          <PhoneCall className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        ) : (
-                          <PhoneOff className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4 font-medium">{call.agent}</td>
-                    <td className="p-4">{call.customer}</td>
-                    <td className="p-4 font-mono text-sm">{call.phone}</td>
-                    <td className="p-4">{call.duration}</td>
-                    <td className="p-4">{call.time}</td>
-                    <td className="p-4">{call.date}</td>
-                    <td className="p-4">
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                          call.status === "completed"
-                            ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
-                            : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
-                        )}
+                {isLoading ? (
+                  Array(5)
+                    .fill(0)
+                    .map((_, index) => (
+                      <tr
+                        key={index}
+                        className="border-b transition-colors hover:bg-muted/50"
                       >
-                        {call.status}
-                      </span>
+                        <td colSpan={8} className="p-4">
+                          <Skeleton className="h-8 w-full" />
+                        </td>
+                      </tr>
+                    ))
+                ) : !callLogs?.data?.length ? (
+                  <tr className="border-b transition-colors hover:bg-muted/50">
+                    <td
+                      colSpan={8}
+                      className="p-4 text-center text-muted-foreground"
+                    >
+                      No call logs found
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  callLogs.data.map((call) => (
+                    <tr
+                      key={call._id}
+                      className="border-b transition-colors hover:bg-muted/50"
+                    >
+                      <td className="p-4">
+                        <div
+                          className={cn(
+                            "flex h-8 w-8 items-center justify-center rounded-full",
+                            call.type === "outbound"
+                              ? "bg-green-100 dark:bg-green-500/20"
+                              : "bg-blue-100 dark:bg-blue-500/20"
+                          )}
+                        >
+                          {call.type === "outbound" ? (
+                            <PhoneCall className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          ) : (
+                            <PhoneOff className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-4 font-medium">{call.agent_id}</td>
+                      <td className="p-4">{call.customer_name}</td>
+                      <td className="p-4 font-mono text-sm">
+                        {call.customer_phone_no}
+                      </td>
+                      <td className="p-4">
+                        {getDuration(call.timestamp_start, call.timestamp_end)}
+                      </td>
+                      <td className="p-4">
+                        {formatTime(call.timestamp_start)}
+                      </td>
+                      <td className="p-4">
+                        {formatDate(call.timestamp_start)}
+                      </td>
+                      <td className="p-4">
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                            call.status === "complete"
+                              ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+                              : call.status === "in_progress"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400"
+                              : "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400"
+                          )}
+                        >
+                          {call.status.replace("_", " ")}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
         </Card>
       </div>
-    </div>
-  </main>
-  )
-}
+    </main>
+  );
+};
 
-export default CallLogs
+export default CallLogs;

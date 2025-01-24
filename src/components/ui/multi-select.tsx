@@ -1,17 +1,17 @@
-import * as React from "react"
-import { X } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import * as React from "react";
+import { X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 type Option = {
-  label: string
-  value: string
-}
+  label: string;
+  value: string;
+};
 
 interface MultiSelectProps {
-  options: Option[]
-  selected: string[]
-  onChange: (selected: string[]) => void
-  placeholder?: string
+  options: Option[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  placeholder?: string;
 }
 
 export function MultiSelect({
@@ -20,32 +20,34 @@ export function MultiSelect({
   onChange,
   placeholder = "Select options",
 }: MultiSelectProps) {
-  const inputRef = React.useRef<HTMLInputElement>(null)
-  const [open, setOpen] = React.useState(false)
-  const [inputValue, setInputValue] = React.useState("")
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [open, setOpen] = React.useState(false);
+  const [inputValue, setInputValue] = React.useState("");
 
   const handleUnselect = (option: string) => {
-    onChange(selected.filter((s) => s !== option))
-  }
+    onChange(selected.filter((s) => s !== option));
+  };
 
   const handleKeyDown = React.useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      const input = inputRef.current
+      const input = inputRef.current;
       if (input) {
         if (e.key === "Delete" || e.key === "Backspace") {
           if (input.value === "" && selected.length > 0) {
-            onChange(selected.slice(0, -1))
+            onChange(selected.slice(0, -1));
           }
         }
         if (e.key === "Escape") {
-          input.blur()
+          input.blur();
         }
       }
     },
     [selected, onChange]
-  )
+  );
 
-  const selectables = options.filter((option) => !selected.includes(option.value))
+  const selectables = options.filter(
+    (option) => !selected.includes(option.value)
+  );
 
   return (
     <div className="relative">
@@ -55,8 +57,8 @@ export function MultiSelect({
       >
         <div className="flex flex-wrap gap-1">
           {selected.map((option) => {
-            const selectedOption = options.find((o) => o.value === option)
-            if (!selectedOption) return null
+            const selectedOption = options.find((o) => o.value === option);
+            if (!selectedOption) return null;
             return (
               <Badge
                 key={option}
@@ -68,19 +70,19 @@ export function MultiSelect({
                   className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleUnselect(option)
+                      handleUnselect(option);
                     }
                   }}
                   onMouseDown={(e: React.MouseEvent) => {
-                    e.preventDefault()
-                    e.stopPropagation()
+                    e.preventDefault();
+                    e.stopPropagation();
                   }}
                   onClick={() => handleUnselect(option)}
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
-            )
+            );
           })}
           <input
             ref={inputRef}
@@ -89,7 +91,7 @@ export function MultiSelect({
             onFocus={() => setOpen(true)}
             onBlur={() => {
               // Delay closing to allow click events to fire
-              setTimeout(() => setOpen(false), 200)
+              setTimeout(() => setOpen(false), 200);
             }}
             placeholder={selected.length === 0 ? placeholder : undefined}
             className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
@@ -104,8 +106,8 @@ export function MultiSelect({
                 key={option.value}
                 className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
                 onClick={() => {
-                  setInputValue("")
-                  onChange([...selected, option.value])
+                  setInputValue("");
+                  onChange([...selected, option.value]);
                 }}
               >
                 {option.label}
@@ -115,5 +117,5 @@ export function MultiSelect({
         </div>
       )}
     </div>
-  )
-} 
+  );
+}

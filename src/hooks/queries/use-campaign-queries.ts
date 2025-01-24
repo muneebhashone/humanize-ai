@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import { Lead } from "./use-leads-queries";
 
 interface Agent {
   _id: string;
@@ -11,7 +12,7 @@ interface Campaign {
   _id: string;
   name: string;
   description: string;
-  leads: string[];
+  leads: Lead[];
   agents_ids: Agent[];
   status: string;
   knowledge_base: string;
@@ -49,7 +50,9 @@ export const useCampaignQuery = (id: string) => {
   return useQuery({
     queryKey: ["campaigns", id],
     queryFn: async () => {
-      const { data } = await api.get<{ success: boolean; data: Campaign }>(`/campaigns/${id}`);
+      const { data } = await api.get<{ success: boolean; data: Campaign }>(
+        `/campaigns/${id}`
+      );
       return data.data;
     },
     enabled: !!id,
