@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useUpdateUserPermissionsMutation } from "@/hooks/mutations/use-permissions-mutations";
 import { toast } from "sonner";
+import { UserPermissionsModal } from "@/components/modals/UserPermissionsModal";
 
 interface User {
   _id: string;
@@ -23,35 +24,32 @@ interface User {
 }
 
 export function UserSettings() {
-  const { data: usersData, isLoading } = useUsersQuery();
+  const { data: usersData, isLoading, refetch } = useUsersQuery();
   const { data: permissions } = usePermissionsQuery();
   const { data: currentUser } = useUserQuery();
-  const [editingUserId, setEditingUserId] = React.useState<string | null>(null);
-  const [selectedPermissions, setSelectedPermissions] = React.useState<
-    string[]
-  >([]);
+  const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
 
   const { mutate: updatePermissions } = useUpdateUserPermissionsMutation();
 
   const isSuperUser = currentUser?.data?.role === "SUPER_ADMIN";
 
   const handleEditPermissions = (user: User) => {
-    setEditingUserId(user._id);
-    setSelectedPermissions(user.permissions);
+    setSelectedUser(user);
   };
 
   const handleSavePermissions = () => {
-    if (!editingUserId) return;
+    if (!selectedUser) return;
 
     updatePermissions(
       {
-        id: editingUserId,
-        permissions: selectedPermissions,
+        id: selectedUser._id,
+        permissions: selectedUser.permissions,
       },
       {
         onSuccess: () => {
           toast.success("Permissions updated successfully");
-          setEditingUserId(null);
+          setSelectedUser(null);
+          refetch();
         },
         onError: (error) => {
           toast.error("Failed to update permissions: " + error.message);
@@ -61,14 +59,22 @@ export function UserSettings() {
   };
 
   const handleCancelEdit = () => {
-    setEditingUserId(null);
-    setSelectedPermissions([]);
+    setSelectedUser(null);
   };
 
   const handlePermissionChange = (permission: string, checked: boolean) => {
-    setSelectedPermissions((prev) =>
-      checked ? [...prev, permission] : prev.filter((p) => p !== permission)
-    );
+    if (!selectedUser) return;
+
+    setSelectedUser((prev) => {
+      if (!prev) return null;
+      
+      return checked
+        ? { ...prev, permissions: [...prev.permissions, permission] }
+        : {
+            ...prev,
+            permissions: prev.permissions.filter((p) => p !== permission),
+          };
+    });
   };
 
   return (
@@ -157,7 +163,7 @@ export function UserSettings() {
                       </span>
                     </td>
                     <td className="p-4">
-                      {editingUserId === user._id ? (
+                      {selectedUser === user ? (
                         <div className="flex flex-col gap-2">
                           {permissions?.data.map((permission) => (
                             <div
@@ -166,7 +172,7 @@ export function UserSettings() {
                             >
                               <Checkbox
                                 id={`${user._id}-${permission}`}
-                                checked={selectedPermissions.includes(
+                                checked={selectedUser?.permissions.includes(
                                   permission
                                 )}
                                 onCheckedChange={(checked) =>
@@ -200,7 +206,7 @@ export function UserSettings() {
                     </td>
                     {isSuperUser && (
                       <td className="p-4">
-                        {editingUserId === user._id ? (
+                        {selectedUser === user ? (
                           <div className="flex items-center gap-2">
                             <Button
                               variant="ghost"
@@ -239,6 +245,15 @@ export function UserSettings() {
           </table>
         </div>
       </div>
+
+      {selectedUser && (
+        <UserPermissionsModal
+          user={selectedUser}
+          open={!!selectedUser}
+          onOpenChange={(open) => !open && setSelectedUser(null)}
+          onSuccess={refetch}
+        />
+      )}
     </Card>
   );
 }
