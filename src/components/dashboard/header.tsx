@@ -4,8 +4,6 @@ import Link from "next/link";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { Sparkles, Phone, Headphones } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-
-import { NotificationsDropdown } from "./notifications-dropdown";
 import { useUserQuery } from "@/hooks/queries/use-auth-query";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -79,7 +77,7 @@ export function DashboardHeader() {
           <ThemeToggle />
 
           {/* Notifications */}
-          <NotificationsDropdown />
+          {/* <NotificationsDropdown /> */}
 
           {/* Divider - Hide on smallest screens */}
           <div className="hidden sm:block h-6 w-px bg-gray-200 dark:bg-gray-800" />
