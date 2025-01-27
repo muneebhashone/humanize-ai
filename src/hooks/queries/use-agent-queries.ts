@@ -2,11 +2,22 @@ import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
 import { Agent } from "@/types";
 
-export const useAgentsQuery = () => {
+interface AgentSearchParams {
+  search?: string;
+  email?: string;
+  persona?: string;
+  voip_no?: string;
+  dept?: string;
+  status?: string;
+}
+
+export const useAgentsQuery = (params?: AgentSearchParams) => {
   return useQuery({
-    queryKey: ["agents"],
+    queryKey: ["agents", params],
     queryFn: async () => {
-      const response = await api.get<{ data: Agent[] }>("/agents");
+      const response = await api.get<{ data: Agent[] }>("/agents", {
+        params,
+      });
       return response.data.data;
     },
   });
@@ -21,4 +32,4 @@ export const useAgentQuery = (id: string) => {
     },
     enabled: !!id,
   });
-}; 
+};
