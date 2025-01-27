@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Users, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const stats = [
@@ -80,7 +80,7 @@ export function AgentStats() {
                   "md:group-hover:text-white"
                 )} />
               </div>
-              <span className={cn(
+              {/* <span className={cn(
                 "flex items-center text-sm font-medium gap-1 px-2 py-1 rounded-full transition-colors duration-300",
                 stat.trend === "up" 
                   ? "text-white bg-white/20 md:text-green-700 md:bg-green-100 md:dark:text-green-400 md:dark:bg-green-400/10 md:group-hover:bg-white/20 md:group-hover:text-white" 
@@ -92,7 +92,7 @@ export function AgentStats() {
                   <ArrowDownRight className="h-4 w-4" />
                 )}
                 {stat.change}
-              </span>
+              </span> */}
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-medium text-white md:text-muted-foreground md:group-hover:text-white/80 transition-colors duration-300">
