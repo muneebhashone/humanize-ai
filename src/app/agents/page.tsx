@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { AgentStats } from "@/components/agents/AgentStats"
-import { AgentSearch } from "@/components/agents/AgentSearch"
+
 import { AgentList } from "@/components/agents/AgentList"
 import { AgentModal } from "@/components/agents/agent-modal"
 import { Agent } from "@/types"
@@ -32,7 +32,6 @@ export default function AgentsPage() {
         <AgentStats />
 
         <div className="space-y-4">
-          <AgentSearch />
           <AgentList onEdit={setEditingAgent} />
         </div>
       </div>
