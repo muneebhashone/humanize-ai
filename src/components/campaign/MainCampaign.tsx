@@ -1,10 +1,18 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import { 
-  Play, Pause, BarChart2, Users, 
-  MoreVertical, Search, ArrowUpRight, ArrowDownRight, 
-  Clock, Loader2
+import {
+  Play,
+  Pause,
+  BarChart2,
+  Users,
+  MoreVertical,
+  Search,
+  ArrowUpRight,
+  ArrowDownRight,
+  Clock,
+  Loader2,
+  UserPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -16,7 +24,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CampaignModal } from "@/components/modals/CampaignModal";
-import { useCampaignsQuery, useCampaignQuery } from "@/hooks/queries/use-campaign-queries";
+import {
+  useCampaignsQuery,
+  useCampaignQuery,
+} from "@/hooks/queries/use-campaign-queries";
 import { useDeleteCampaignMutation } from "@/hooks/mutations/use-campaign-mutations";
 import { useState } from "react";
 import {
@@ -35,7 +46,7 @@ const stats = [
     trend: "up",
     color: "from-violet-600 to-indigo-600",
     iconColor: "group-hover:text-violet-200",
-    bgColor: "violet-100"
+    bgColor: "violet-100",
   },
   {
     title: "Total Agents",
@@ -44,7 +55,7 @@ const stats = [
     trend: "up",
     color: "from-emerald-600 to-teal-600",
     iconColor: "group-hover:text-emerald-200",
-    bgColor: "emerald-100"
+    bgColor: "emerald-100",
   },
   {
     title: "Success Rate",
@@ -53,7 +64,7 @@ const stats = [
     trend: "up",
     color: "from-orange-600 to-amber-600",
     iconColor: "group-hover:text-orange-200",
-    bgColor: "orange-100"
+    bgColor: "orange-100",
   },
   {
     title: "Avg. Duration",
@@ -62,7 +73,7 @@ const stats = [
     trend: "down",
     color: "from-pink-600 to-rose-600",
     iconColor: "group-hover:text-pink-200",
-    bgColor: "pink-100"
+    bgColor: "pink-100",
   },
 ];
 
@@ -76,27 +87,29 @@ const statusOptions = [
 export default function MainCampaign() {
   const [filters, setFilters] = useState({
     search: "",
-    status: "all"
+    status: "all",
   });
 
-  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(
+    null
+  );
   const deleteCampaign = useDeleteCampaignMutation();
 
   const { data: campaigns, isLoading } = useCampaignsQuery({
     search: filters.search,
-    status: filters.status === "all" ? undefined : filters.status
+    status: filters.status === "all" ? undefined : filters.status,
   });
-  
+
   const { data: selectedCampaign } = useCampaignQuery(selectedCampaignId || "");
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilters(prev => ({ ...prev, search: e.target.value }));
+    setFilters((prev) => ({ ...prev, search: e.target.value }));
   };
 
   const handleStatusChange = (value: string) => {
-    setFilters(prev => ({ 
-      ...prev, 
-      status: value 
+    setFilters((prev) => ({
+      ...prev,
+      status: value,
     }));
   };
 
@@ -116,13 +129,21 @@ export default function MainCampaign() {
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
       case "progress":
-        return <Play className="h-4 w-4 text-white md:text-green-500 md:group-hover:text-white" />;
+        return (
+          <Play className="h-4 w-4 text-white md:text-green-500 md:group-hover:text-white" />
+        );
       case "stop":
-        return <Pause className="h-4 w-4 text-white md:text-yellow-500 md:group-hover:text-white" />;
+        return (
+          <Pause className="h-4 w-4 text-white md:text-yellow-500 md:group-hover:text-white" />
+        );
       case "completed":
-        return <Clock className="h-4 w-4 text-white md:text-blue-500 md:group-hover:text-white" />;
+        return (
+          <Clock className="h-4 w-4 text-white md:text-blue-500 md:group-hover:text-white" />
+        );
       default:
-        return <Clock className="h-4 w-4 text-white md:text-violet-500 md:group-hover:text-white" />;
+        return (
+          <Clock className="h-4 w-4 text-white md:text-violet-500 md:group-hover:text-white" />
+        );
     }
   };
 
@@ -138,7 +159,7 @@ export default function MainCampaign() {
     try {
       await deleteCampaign.mutateAsync(id);
     } catch (error) {
-      console.error('Failed to delete campaign:', error);
+      console.error("Failed to delete campaign:", error);
     }
   };
 
@@ -154,12 +175,12 @@ export default function MainCampaign() {
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <Card 
-              key={stat.title} 
+            <Card
+              key={stat.title}
               className="group relative overflow-hidden border-0 bg-background hover:shadow-lg transition-all duration-300"
             >
               {/* Gradient Background Overlay */}
-              <div 
+              <div
                 className={cn(
                   "absolute inset-0 bg-gradient-to-r",
                   stat.color,
@@ -167,34 +188,42 @@ export default function MainCampaign() {
                   "opacity-100 dark:opacity-90"
                 )}
               />
-              
+
               {/* Large Background Icon */}
               <div className="absolute -top-12 -right-12 transition-all duration-300">
-                <BarChart2 className={cn(
-                  "h-32 w-32 rotate-12 md:rotate-0 md:group-hover:rotate-12 transition-all duration-300",
-                  "text-muted/25 dark:text-muted/10",
-                  stat.iconColor
-                )} />
+                <BarChart2
+                  className={cn(
+                    "h-32 w-32 rotate-12 md:rotate-0 md:group-hover:rotate-12 transition-all duration-300",
+                    "text-muted/25 dark:text-muted/10",
+                    stat.iconColor
+                  )}
+                />
               </div>
 
               <div className="p-6 relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className={cn(
-                    "p-2 rounded-lg transition-colors duration-300",
-                    "bg-white/20 md:bg-${stat.bgColor} dark:bg-gray-800 md:group-hover:bg-white/20"
-                  )}>
-                    <BarChart2 className={cn(
-                      "h-5 w-5 transition-colors duration-300",
-                      "text-white md:text-${stat.color.split('-')[0]}-600 md:dark:text-${stat.color.split('-')[0]}-400",
-                      "md:group-hover:text-white"
-                    )} />
+                  <div
+                    className={cn(
+                      "p-2 rounded-lg transition-colors duration-300",
+                      "bg-white/20 md:bg-${stat.bgColor} dark:bg-gray-800 md:group-hover:bg-white/20"
+                    )}
+                  >
+                    <BarChart2
+                      className={cn(
+                        "h-5 w-5 transition-colors duration-300",
+                        "text-white md:text-${stat.color.split('-')[0]}-600 md:dark:text-${stat.color.split('-')[0]}-400",
+                        "md:group-hover:text-white"
+                      )}
+                    />
                   </div>
-                  <span className={cn(
-                    "flex items-center text-sm font-medium gap-1 px-2 py-1 rounded-full transition-colors duration-300",
-                    stat.trend === "up" 
-                      ? "text-white bg-white/20 md:text-green-700 md:bg-green-100 md:dark:text-green-400 md:dark:bg-green-400/10 md:group-hover:bg-white/20 md:group-hover:text-white" 
-                      : "text-white bg-white/20 md:text-red-700 md:bg-red-100 md:dark:text-red-400 md:dark:bg-red-400/10 md:group-hover:bg-white/20 md:group-hover:text-white"
-                  )}>
+                  <span
+                    className={cn(
+                      "flex items-center text-sm font-medium gap-1 px-2 py-1 rounded-full transition-colors duration-300",
+                      stat.trend === "up"
+                        ? "text-white bg-white/20 md:text-green-700 md:bg-green-100 md:dark:text-green-400 md:dark:bg-green-400/10 md:group-hover:bg-white/20 md:group-hover:text-white"
+                        : "text-white bg-white/20 md:text-red-700 md:bg-red-100 md:dark:text-red-400 md:dark:bg-red-400/10 md:group-hover:bg-white/20 md:group-hover:text-white"
+                    )}
+                  >
                     {stat.trend === "up" ? (
                       <ArrowUpRight className="h-4 w-4" />
                     ) : (
@@ -222,18 +251,15 @@ export default function MainCampaign() {
               <div className="flex-1">
                 <div className="relative">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search campaigns..." 
-                    className="pl-8" 
+                  <Input
+                    placeholder="Search campaigns..."
+                    className="pl-8"
                     value={filters.search}
                     onChange={handleSearch}
                   />
                 </div>
               </div>
-              <Select
-                value={filters.status}
-                onValueChange={handleStatusChange}
-              >
+              <Select value={filters.status} onValueChange={handleStatusChange}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -259,9 +285,12 @@ export default function MainCampaign() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {campaigns.map((campaign) => (
-                <Card key={campaign._id} className="group relative overflow-hidden border-0 bg-background hover:shadow-lg transition-all duration-300">
+                <Card
+                  key={campaign._id}
+                  className="group relative overflow-hidden border-0 bg-background hover:shadow-lg transition-all duration-300"
+                >
                   {/* Gradient Background Overlay */}
-                  <div 
+                  <div
                     className={cn(
                       "absolute inset-0 bg-gradient-to-r",
                       getStatusColor(campaign.status),
@@ -277,15 +306,24 @@ export default function MainCampaign() {
                       </h3>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="text-white md:text-muted-foreground md:group-hover:text-white">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-white md:text-muted-foreground md:group-hover:text-white"
+                          >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(campaign._id)}>
+                          <DropdownMenuItem
+                            onClick={() => handleEdit(campaign._id)}
+                          >
                             Edit
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(campaign._id)}>
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => handleDelete(campaign._id)}
+                          >
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -294,7 +332,9 @@ export default function MainCampaign() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Agents</span>
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">
+                          Agents
+                        </span>
                         <div className="flex items-center gap-2">
                           <Users className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
                           <span className="font-medium text-white md:text-foreground md:group-hover:text-white">
@@ -303,7 +343,20 @@ export default function MainCampaign() {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Knowledge Base</span>
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">
+                          Leads
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <UserPlus className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
+                          <span className="font-medium text-white md:text-foreground md:group-hover:text-white">
+                            {campaign.leads.length}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">
+                          Knowledge Base
+                        </span>
                         <div className="flex items-center gap-2">
                           <BarChart2 className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
                           <span className="font-medium capitalize text-white md:text-foreground md:group-hover:text-white">
@@ -312,7 +365,9 @@ export default function MainCampaign() {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Status</span>
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">
+                          Status
+                        </span>
                         <div className="flex items-center gap-2">
                           {getStatusIcon(campaign.status)}
                           <span className="font-medium capitalize text-white md:text-foreground md:group-hover:text-white">
@@ -321,7 +376,9 @@ export default function MainCampaign() {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">Created</span>
+                        <span className="text-xs text-white/70 md:text-muted-foreground md:group-hover:text-white/70">
+                          Created
+                        </span>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-white md:text-muted-foreground md:group-hover:text-white" />
                           <span className="font-medium text-white md:text-foreground md:group-hover:text-white">
@@ -345,11 +402,11 @@ export default function MainCampaign() {
       </div>
 
       {selectedCampaignId && (
-        <CampaignModal 
+        <CampaignModal
           campaign={selectedCampaign}
           onOpenChange={(open) => !open && handleCloseModal()}
         />
       )}
     </main>
   );
-} 
+}
