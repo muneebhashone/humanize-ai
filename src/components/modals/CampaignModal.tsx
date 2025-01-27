@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -21,21 +21,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useCreateCampaignMutation, useUpdateCampaignMutation } from "@/hooks/mutations/use-campaign-mutations"
-import { Textarea } from "../ui/textarea"
-import { MultiSelect } from "../ui/multi-select"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  useCreateCampaignMutation,
+  useUpdateCampaignMutation,
+} from "@/hooks/mutations/use-campaign-mutations";
+import { Textarea } from "../ui/textarea";
+import { MultiSelect } from "../ui/multi-select";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../ui/select"
-import { PlusCircle } from "lucide-react"
-import { useAgentsQuery } from "@/hooks/queries/use-agent-queries"
-import { useEffect, useState } from "react"
+} from "../ui/select";
+import { PlusCircle } from "lucide-react";
+import { useAgentsQuery } from "@/hooks/queries/use-agent-queries";
+import { useEffect, useState } from "react";
+import { Lead, useLeadsQuery } from "@/hooks/queries/use-leads-queries";
 
 interface Agent {
   _id: string;
@@ -47,7 +51,7 @@ interface Campaign {
   _id: string;
   name: string;
   description: string;
-  leads: string[];
+  leads: Lead[];
   agents_ids: Agent[];
   status: string;
   knowledge_base: string;
@@ -59,24 +63,24 @@ interface Campaign {
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  leads: z.array(z.string()).optional(),
+  leads: z.array(z.string()).min(1, "Select at least one lead"),
   agents_ids: z.array(z.string()).min(1, "Select at least one agent"),
   status: z.string(),
   knowledge_base: z.string(),
   documents_index: z.string(),
-})
+});
 
 const knowledgeBaseOptions = [
   { label: "Light", value: "light" },
   { label: "Medium", value: "medium" },
   { label: "Heavy", value: "heavy" },
-]
+];
 
 const statusOptions = [
   { label: "Progress", value: "progress" },
   { label: "Stop", value: "stop" },
   { label: "Completed", value: "completed" },
-]
+];
 
 interface CampaignModalProps {
   campaign?: Campaign;
@@ -88,6 +92,7 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
   const createCampaign = useCreateCampaignMutation();
   const updateCampaign = useUpdateCampaignMutation();
   const { data: agents } = useAgentsQuery();
+  const { data: leads } = useLeadsQuery();
 
   const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
@@ -105,57 +110,74 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
       knowledge_base: "light",
       documents_index: "",
     },
-  })
+  });
 
   useEffect(() => {
     if (campaign) {
       form.reset({
         name: campaign.name,
         description: campaign.description,
-        leads: campaign.leads,
-        agents_ids: campaign.agents_ids.map(agent => agent._id),
+        leads: campaign.leads.map((lead) => lead._id),
+        agents_ids: campaign.agents_ids.map((agent) => agent._id),
         status: campaign.status,
         knowledge_base: campaign.knowledge_base,
         documents_index: campaign.documents_index,
-      })
+      });
     }
-  }, [campaign, form])
+  }, [campaign, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     if (campaign) {
-      updateCampaign.mutate({
-        id: campaign._id,
-        data: {
-          ...values,
-          leads: values.leads || [],
+      updateCampaign.mutate(
+        {
+          id: campaign._id,
+          data: {
+            name: values.name,
+            description: values.description,
+            leads: values.leads,
+            agents_ids: values.agents_ids,
+            status: values.status,
+            knowledge_base: values.knowledge_base,
+            documents_index: values.documents_index,
+          },
+        },
+        {
+          onSuccess: () => {
+            form.reset();
+            setOpen(false);
+            onOpenChange?.(false);
+          },
         }
-      }, {
-        onSuccess: () => {
-          form.reset();
-          setOpen(false);
-          onOpenChange?.(false);
-        },
-      });
+      );
     } else {
-      createCampaign.mutate({
-        ...values,
-        leads: values.leads || [],
-      }, {
-        onSuccess: () => {
-          form.reset();
-          setOpen(false);
-          onOpenChange?.(false);
+      createCampaign.mutate(
+        {
+          ...values,
         },
-      });
+        {
+          onSuccess: () => {
+            form.reset();
+            setOpen(false);
+            onOpenChange?.(false);
+          },
+        }
+      );
     }
   }
 
   const isLoading = createCampaign.isPending || updateCampaign.isPending;
 
-  const agentOptions = agents?.map((agent: Agent) => ({
-    label: agent.name,
-    value: agent._id,
-  })) || []
+  const agentOptions =
+    agents?.map((agent: Agent) => ({
+      label: agent.name,
+      value: agent._id,
+    })) || [];
+
+  const leadOptions =
+    leads?.map((lead: Lead) => ({
+      label: lead.name,
+      value: lead._id,
+    })) || [];
 
   return (
     <Dialog open={campaign ? !!campaign : open} onOpenChange={handleOpenChange}>
@@ -169,9 +191,13 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
       )}
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{campaign ? "Edit Campaign" : "Create New Campaign"}</DialogTitle>
+          <DialogTitle>
+            {campaign ? "Edit Campaign" : "Create New Campaign"}
+          </DialogTitle>
           <DialogDescription>
-            {campaign ? "Update campaign details below." : "Fill in the details below to create a new campaign."}
+            {campaign
+              ? "Update campaign details below."
+              : "Fill in the details below to create a new campaign."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -196,9 +222,9 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Enter campaign description" 
-                      {...field} 
+                    <Textarea
+                      placeholder="Enter campaign description"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -223,6 +249,26 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="leads"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Leads</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      options={leadOptions}
+                      selected={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select leads"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -230,7 +276,10 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select status" />
@@ -254,7 +303,10 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Knowledge Base</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select knowledge base" />
@@ -292,16 +344,19 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
                   Cancel
                 </Button>
               </DialogClose>
-              <Button 
-                type="submit" 
-                disabled={isLoading}
-              >
-                {isLoading ? (campaign ? "Updating..." : "Creating...") : (campaign ? "Update Campaign" : "Create Campaign")}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading
+                  ? campaign
+                    ? "Updating..."
+                    : "Creating..."
+                  : campaign
+                  ? "Update Campaign"
+                  : "Create Campaign"}
               </Button>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

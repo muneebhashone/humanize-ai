@@ -15,7 +15,7 @@ import {
 const hourlyData = [
   { hour: "9 AM", calls: 45, success: 35 },
   { hour: "10 AM", calls: 78, success: 62 },
-  { hour: "11 AM", calls: 92, success: 75 },
+  { hour: "11 AM", calls: 92, success: 65 },
   { hour: "12 PM", calls: 65, success: 48 },
   { hour: "1 PM", calls: 89, success: 70 },
   { hour: "2 PM", calls: 106, success: 88 },

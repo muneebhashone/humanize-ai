@@ -12,6 +12,7 @@ interface User {
   username: string;
   name: string;
   role: string;
+  permissions: string[];
   socialAccount: SocialAccount[];
   createdAt: string;
   updatedAt: string;
@@ -23,20 +24,26 @@ interface UserResponse {
   data: User;
 }
 
-
-const authService =  async ( ) => {
+const authService = async () => {
   const { data } = await axios.get<UserResponse>("/auth/user");
   return data;
-}
+};
 
 /**
  * Hook to fetch authenticated user data from the API
  * Returns the full query object with data, loading and error states
  */
-export const useUserQuery = (options?: Omit<UseQueryOptions<UserResponse, Error, UserResponse>, 'queryKey'> & { queryKey?: UseQueryOptions<UserResponse, Error, UserResponse>['queryKey'] }) => {
+export const useUserQuery = (
+  options?: Omit<
+    UseQueryOptions<UserResponse, Error, UserResponse>,
+    "queryKey"
+  > & {
+    queryKey?: UseQueryOptions<UserResponse, Error, UserResponse>["queryKey"];
+  }
+) => {
   return useQuery({
     queryKey: ["user"],
     queryFn: authService,
-    ...(options || {})
+    ...(options || {}),
   });
 };
