@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import api from "@/lib/axios";
+import { AxiosError } from "axios";
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +11,6 @@ export async function POST(request: Request) {
     
     // Call your backend API
     const response = await api.post("/auth/login/email", body)
-
 
     const cookieStore = await cookies();
     
@@ -26,7 +26,15 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response.data.data);
   } catch (error) {
-    console.log(error);
+    // console.log(JSON.stringify(error, null, 2))
+    if(error instanceof AxiosError) {
+      console.log({errorMessage: error.response?.data?.message, status: error.response?.status})
+      return NextResponse.json(
+        { message: error.response?.data?.message || "Something went wrong" },
+        { status: error.response?.status || 500 }
+      );
+    }
+
     return NextResponse.json(
       { message: error instanceof Error ? error.message : "Something went wrong" },
       { status: 500 }
