@@ -23,15 +23,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useLoginMutation } from "@/hooks/mutations/use-auth-mutations";
-import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
-  }),
+  password: z.string(),
 });
 
 const MainLogin = () => {
@@ -46,13 +43,9 @@ const MainLogin = () => {
   const login = useLoginMutation();
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await login.mutateAsync(values);
-      toast.success("Login successful!");
+  
+      await login.mutate(values);
     
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
   }
 
   return (

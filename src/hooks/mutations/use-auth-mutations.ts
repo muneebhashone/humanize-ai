@@ -3,7 +3,9 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import axios from "axios";
-
+import { extractErrorMessage } from "@/lib/errorHandler";
+import router, { Router } from "next/router";
+import { useEffect, useState } from "react";
 
 interface LoginCredentials {
   email: string;
@@ -18,23 +20,6 @@ interface RegisterData {
   confirmPassword: string;
 }
 
-// interface SocialAccount {
-//   provider: string;
-//   id: string;
-// }
-
-// interface User {
-//   _id: string;
-//   email: string;
-//   username: string;
-//   name: string;
-//   role: string;
-//   socialAccount: SocialAccount[];
-//   createdAt: string;
-//   updatedAt: string;
-//   sub: string;
-// }
-
 interface ForgotPasswordData {
   email: string;
 }
@@ -47,22 +32,48 @@ interface ResetPasswordData {
 }
 
 export const useLoginMutation = () => {
-  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); 
 
-  return useMutation({  
+  useEffect(() => {
+    const setLoadingTrue = () => {
+      setIsLoading(true);
+    };
+
+    const setLoadingFalse = () => {
+      setIsLoading(false);
+    };
+
+    Router.events.on("routeChangeStart", setLoadingTrue);
+    Router.events.on("routeChangeError", setLoadingFalse);
+    Router.events.on("hashChangeStart", setLoadingTrue);
+    Router.events.on("hashChangeComplete", setLoadingFalse);
+    Router.events.on("routeChangeComplete", setLoadingFalse);
+
+    return () => {
+      Router.events.off("routeChangeStart", setLoadingTrue);
+      Router.events.off("routeChangeComplete", setLoadingFalse);
+      Router.events.off("hashChangeStart", setLoadingTrue);
+      Router.events.off("hashChangeComplete", setLoadingFalse);
+      Router.events.off("routeChangeError", setLoadingFalse);
+    };
+  }, []);
+
+  const { mutate, isPending, error } = useMutation({
     mutationFn: async (credentials: LoginCredentials) => {
-      
       const response = await axios.post("/api/auth/login", credentials);
       return response.data;
     },
     onSuccess: (data) => {
-      router.replace("/");
       toast.success(data.message || "Welcome back!");
+      router.replace("/");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to login. Please try again.");
+      toast.error(extractErrorMessage(error));
     },
   });
+
+  return { mutate, isPending: isLoading || isPending, error };
 };
 
 export const useRegisterMutation = () => {
@@ -74,10 +85,10 @@ export const useRegisterMutation = () => {
     },
     onSuccess: (data) => {
       toast.success(data.message || "Account created successfully!");
-     router.push('/login')
+      router.push("/login");
     },
     onError: (error) => {
-      toast.error(error.message)
+      toast.error(extractErrorMessage(error));
     },
   });
 };
@@ -85,14 +96,14 @@ export const useRegisterMutation = () => {
 const logout = async () => {
   const response = await axios.post("/api/auth/logout");
   return response.data;
-}
+};
 
 export const useLogoutMutation = (options?: MutationOptions) => {
   return useMutation({
     mutationFn: logout,
     ...options,
   });
-}
+};
 
 export const useForgetPasswordMutation = () => {
   return useMutation({
@@ -104,7 +115,9 @@ export const useForgetPasswordMutation = () => {
       toast.success("Reset link sent to your email!");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to send reset link. Please try again.");
+      toast.error(
+        error.message || "Failed to send reset link. Please try again."
+      );
     },
   });
 };
@@ -122,8 +135,9 @@ export const useResetPasswordMutation = () => {
       router.push("/login");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to reset password. Please try again.");
+      toast.error(
+        error.message || "Failed to reset password. Please try again."
+      );
     },
   });
 };
-
