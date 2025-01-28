@@ -8,8 +8,7 @@ import {
   Users,
   MoreVertical,
   Search,
-  ArrowUpRight,
-  ArrowDownRight,
+
   Clock,
   Loader2,
   UserPlus,
@@ -216,7 +215,7 @@ export default function MainCampaign() {
                       )}
                     />
                   </div>
-                  <span
+                  {/* <span
                     className={cn(
                       "flex items-center text-sm font-medium gap-1 px-2 py-1 rounded-full transition-colors duration-300",
                       stat.trend === "up"
@@ -230,7 +229,7 @@ export default function MainCampaign() {
                       <ArrowDownRight className="h-4 w-4" />
                     )}
                     {stat.change}
-                  </span>
+                  </span> */}
                 </div>
                 <div className="space-y-1">
                   <h3 className="text-sm font-medium text-white md:text-muted-foreground md:group-hover:text-white/80 transition-colors duration-300">

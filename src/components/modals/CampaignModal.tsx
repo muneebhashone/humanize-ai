@@ -36,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { PlusCircle } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 import { useAgentsQuery } from "@/hooks/queries/use-agent-queries";
 import { useEffect, useState } from "react";
 import { Lead, useLeadsQuery } from "@/hooks/queries/use-leads-queries";
@@ -71,9 +71,9 @@ const formSchema = z.object({
 });
 
 const knowledgeBaseOptions = [
-  { label: "Light", value: "light" },
-  { label: "Medium", value: "medium" },
-  { label: "Heavy", value: "heavy" },
+  { label: "Sales", value: "sales" },
+  { label: "Marketing", value: "marketing" },
+  { label: "Support", value: "support" },
 ];
 
 const statusOptions = [
@@ -107,7 +107,7 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
       leads: [],
       agents_ids: [],
       status: "stop",
-      knowledge_base: "light",
+      knowledge_base: "sales",
       documents_index: "",
     },
   });
@@ -347,8 +347,8 @@ export function CampaignModal({ campaign, onOpenChange }: CampaignModalProps) {
               <Button type="submit" disabled={isLoading}>
                 {isLoading
                   ? campaign
-                    ? "Updating..."
-                    : "Creating..."
+                    ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                    : <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   : campaign
                   ? "Update Campaign"
                   : "Create Campaign"}
